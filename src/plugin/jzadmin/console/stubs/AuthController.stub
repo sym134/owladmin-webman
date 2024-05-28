@@ -1,0 +1,10 @@
+<?php
+
+namespace {{Namespace}};
+
+use plugin\jzadmin\controller\AuthController as AdminAuthController;
+
+class AuthController extends AdminAuthController
+{
+
+}

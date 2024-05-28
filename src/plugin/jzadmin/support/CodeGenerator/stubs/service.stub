@@ -1,0 +1,17 @@
+<?php
+
+namespace {{ Namespace }};
+
+use {{ UseModel }};
+use plugin\jzadmin\service\AdminService;
+
+/**
+ * {{ AppTitle }}
+ *
+ * @method {{ ModelName }} getModel()
+ * @method {{ ModelName }}|\Illuminate\Database\Query\Builder query()
+ */
+class {{ ClassName }} extends AdminService
+{
+    protected string $modelName = {{ ModelName }}::class;
+}
