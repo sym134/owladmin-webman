@@ -6,7 +6,7 @@ namespace plugin\jzadmin\renderer;
  * IconItem
  *
  * @author  slowlyo
- * @version v6.0.0
+ * @version 6.4.1
  */
 class IconItem extends BaseRenderer
 {
@@ -17,7 +17,7 @@ class IconItem extends BaseRenderer
     }
 
     /**
-     *
+     * iconfont 里面的类名。
      */
     public function icon($value = '')
     {

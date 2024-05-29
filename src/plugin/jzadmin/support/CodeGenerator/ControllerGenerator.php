@@ -54,7 +54,7 @@ class ControllerGenerator extends BaseGenerator
         $this->columns = $columns;
 
         if ($this->columns->isEmpty()) {
-            abort(400, 'Table fields can\'t be empty');
+            abort(400, 'Table fields can\'t be empty'); // webman
         }
 
         return $this;
@@ -66,14 +66,14 @@ class ControllerGenerator extends BaseGenerator
         $path = static::guessClassFileName($name);
         $dir  = dirname($path);
 
-        $files = appw('files');
+        $files = app('files');
 
         if (!is_dir($dir)) {
             $files->makeDirectory($dir, 0755, true);
         }
 
         if ($files->exists($path)) {
-            abort(400, "Controller [$name] already exists!");
+            abort(400, "Controller [$name] already exists!"); // webman
         }
 
         $stub = $files->get($this->stub);
@@ -96,7 +96,7 @@ class ControllerGenerator extends BaseGenerator
     public function preview($name)
     {
         $name  = str_replace('/', '\\', $name);
-        $files = appw('files');
+        $files = app('files');
         $stub  = $files->get($this->stub);
 
         return $this->replaceClass($stub, $name)
@@ -135,16 +135,21 @@ class ControllerGenerator extends BaseGenerator
 
             $item = $this->getColumnComponent('list_component', $column);
 
-            if ($column['type'] == 'integer') {
-                $item .= '->sortable(true)';
+            if ($column['type'] == 'integer' && !Str::contains($column['name'], '_id')) {
+                $item .= '->sortable()';
             }
 
             $list->push($item);
         });
 
         if ($this->needTimestamp) {
-            $list->push("amis()->TableColumn('created_at', __('admin.created_at'))->type('datetime')->sortable(true)");
-            $list->push("amis()->TableColumn('updated_at', __('admin.updated_at'))->type('datetime')->sortable(true)");
+            if ($this->pageInfo['list_display_created_at']) {
+                $list->push("amis()->TableColumn('created_at', admin_trans('admin.created_at'))->set('type', 'datetime')->sortable()");
+            }
+
+            if ($this->pageInfo['list_display_updated_at']) {
+                $list->push("amis()->TableColumn('updated_at', admin_trans('admin.updated_at'))->set('type', 'datetime')->sortable()");
+            }
         }
 
         $list = $list->implode(",\n\t\t\t\t") . ',';
@@ -248,8 +253,8 @@ class ControllerGenerator extends BaseGenerator
         });
 
         if ($this->needTimestamp) {
-            $detail->push("amis()->TextControl('created_at', __('admin.created_at'))->static()");
-            $detail->push("amis()->TextControl('updated_at', __('admin.updated_at'))->static()");
+            $detail->push("amis()->TextControl('created_at', admin_trans('admin.created_at'))->static()");
+            $detail->push("amis()->TextControl('updated_at', admin_trans('admin.updated_at'))->static()");
         }
 
         $detail = $detail->implode(",\n\t\t\t");
@@ -278,6 +283,10 @@ class ControllerGenerator extends BaseGenerator
                 $item .= collect($property)->map(function ($item) {
                     $_val = Arr::get($item, 'value');
 
+                    if (is_json($_val)) {
+                        return '->' . Arr::get($item, 'name') . '(' . $this->jsonToStringArray($_val) . ')';
+                    }
+
                     if (filled($_val) && !in_array($_val, ['true', 'false']) && !is_numeric($_val)) {
                         $_val = "'{$_val}'";
                     }
@@ -294,5 +303,45 @@ class ControllerGenerator extends BaseGenerator
             'form_component' => "amis()->TextControl('{$column['name']}', '{$label}')",
             'detail_component' => "amis()->TextControl('{$column['name']}', '{$label}')->static()",
         };
+    }
+
+    /**
+     * json 字符串转 PHP 数组字符串
+     *
+     * @param $jsonString
+     *
+     * @return string|string[]|null
+     */
+    private function jsonToStringArray($jsonString)
+    {
+        // 首先，检查输入是否为有效的JSON字符串
+        if (!is_json($jsonString)) {
+            return $jsonString;
+        }
+
+        $dataArray = json_decode($jsonString, true);
+
+        // 遍历数组，确保所有的字符串都正确处理Unicode编码，特别是中文
+        array_walk_recursive($dataArray, function (&$item) {
+            if (is_string($item)) {
+                $item = mb_convert_encoding($item, 'UTF-8', 'UTF-8');
+            }
+        });
+
+        // 使用var_export()生成数组的字符串表示，然后将其返回
+        $phpArrayString = var_export($dataArray, true);
+
+        // 转换为短数组语法
+        $phpArrayString = preg_replace('/array \(/', '[', $phpArrayString);
+        $phpArrayString = preg_replace('/\)$/', ']', $phpArrayString);
+        $phpArrayString = str_replace(')', ']', $phpArrayString);
+
+        // 去除数字索引
+        $phpArrayString = preg_replace('/\d+ => /', '', $phpArrayString);
+
+        // 去除多余的空格和换行，使输出更为紧凑
+        $phpArrayString = preg_replace('/ =>\s+\[/', '=> [', $phpArrayString);
+
+        return str_replace(["\r\n", "\r", "\n", "\t", "  "], '', $phpArrayString);
     }
 }

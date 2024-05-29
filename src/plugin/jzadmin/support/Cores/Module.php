@@ -3,50 +3,97 @@
 namespace plugin\jzadmin\support\Cores;
 
 use Illuminate\Support\Str;
-use plugin\jzadmin\support\Composer;
+use Illuminate\Filesystem\Filesystem;
+use Illuminate\Foundation\ProviderRepository;
 
 class Module
 {
-    public static function installed()
+    public string $namespace = '';
+    public string $dir       = '';
+
+    public function __construct()
     {
-        return class_exists('Nwidart\Modules\Facades\Module');
+        $this->namespace = config('plugin.jzadmin.admin.modules_namespace', 'AdminModules');
+        $this->dir       = config('plugin.jzadmin.admin.modules_dir', 'admin-modules');
     }
 
-    public static function isV10()
+    /**
+     * 当前模块
+     *
+     * @param bool $lower
+     *
+     * @return mixed|string|null
+     */
+    public static function current(bool $lower = false)
     {
-        return version_compare(Composer::getVersion('nwidart/laravel-modules'), '10', '>=');
-    }
+        $prefix = data_get(explode('/', is_null(request()) ? '' : ltrim(request()->route->getPath(),'/')), 0); // webman
+        if ($prefix) {
+            $m       = new Module;
+            $modules = $m->allModules(true);
+            if (count($modules)) {
+                $_list = collect($modules)
+                    ->combine($modules)
+                    ->map(fn($item) => config($m->getLowerName($item) . '.admin.route.prefix', ''))
+                    ->flip()
+                    ->toArray();
 
-    public static function getModulePath($module, $path, $isApp = false)
-    {
-        $base = rtrim(config('modules.paths.modules'), '/') . '/' . $module . '/';
-
-        if (self::isV10()) {
-            if ($isApp) {
-                $base .= 'app/';
-            } else {
-                $path = Str::lcfirst(ltrim($path, '/'));
+                if (key_exists($prefix, $_list)) {
+                    return $lower ? $m->getLowerName($_list[$prefix]) : $_list[$prefix];
+                }
             }
-        } else {
-            $path = Str::ucfirst(ltrim($path, '/'));
         }
 
-        return $base . $path;
+        return null;
     }
 
-    public static function allModules()
+    public function register()
     {
-        return config('admin.modules');
+        $modules = $this->allModules(true);
+
+        if (blank($modules)) {
+            return;
+        }
+
+        $serviceProviders = collect($modules)
+            ->map(fn($i) => sprintf('%s\\%s\\%sServiceProvider', $this->namespace, $i, $i))
+            ->filter(fn($i) => class_exists($i))
+            ->all();
+
+        (new ProviderRepository(app(), new Filesystem(), app()->getCachedServicesPath()))->load($serviceProviders);
     }
 
-    public static function allRoutePath()
+    public function allModules($onlyEnabled = false)
+    {
+        $modules = config('plugin.jzadmin.admin.modules', []); // webman
+
+        if ($onlyEnabled) {
+            $modules = array_filter($modules);
+        }
+
+        return array_keys($modules);
+    }
+
+    public function has($module)
+    {
+        return in_array($module, $this->allModules()) || file_exists($this->getModulePath($module));
+    }
+
+    public function getModulePath($module = null)
+    {
+        return $this->dir . '/' . $module;
+    }
+
+    public function getLowerName($module)
+    {
+        return Str::snake($module);
+    }
+
+    public function allRoutePath()
     {
         $path = [];
-
-        $modules = self::allModules();
-        if (self::installed() && $modules) {
+        if ($modules = $this->allModules(true)) {
             foreach ($modules as $module) {
-                $_path = self::getModulePath($module, '/routes/admin.php');
+                $_path = $this->getModulePath($module . '/routes.php');
 
                 if (file_exists($_path)) {
                     $path[] = $_path;
@@ -57,17 +104,15 @@ class Module
         return $path;
     }
 
-    public static function allConfigPath()
+    public function allConfigPath()
     {
         $path = [];
-
-        $modules = self::allModules();
-        if (self::installed() && $modules) {
+        if ($modules = $this->allModules(true)) {
             foreach ($modules as $module) {
-                $_path = self::getModulePath($module, '/config/admin.php');
+                $_path = $this->getModulePath($module . '/config.php');
 
                 if (file_exists($_path)) {
-                    $path[strtolower($module) . '.admin'] = $_path;
+                    $path[$this->getLowerName($module) . '.admin'] = $_path;
                 }
             }
         }

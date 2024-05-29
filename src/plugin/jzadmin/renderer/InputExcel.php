@@ -6,7 +6,7 @@ namespace plugin\jzadmin\renderer;
  * InputExcel 解析 Excel
  *
  * @author  slowlyo
- * @version v6.0.0
+ * @version 6.4.1
  */
 class InputExcel extends BaseRenderer
 {

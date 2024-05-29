@@ -2,20 +2,18 @@
 
 namespace plugin\jzadmin\model;
 
-use Illuminate\Database\Eloquent\Model;
+use support\Model;
 use plugin\jzadmin\Admin;
+use plugin\jzadmin\trait\DatetimeFormatterTrait;
 
 class BaseModel extends Model
 {
+    use DatetimeFormatterTrait;
+
     public function __construct(array $attributes = [])
     {
         $this->setConnection(Admin::config('admin.database.connection'));
 
         parent::__construct($attributes);
-    }
-
-    protected function serializeDate(\DateTimeInterface $date): string
-    {
-        return $date->format($this->getDateFormat());
     }
 }

@@ -6,7 +6,7 @@ namespace plugin\jzadmin\renderer;
  * Markdown 渲染
  *
  * @author  slowlyo
- * @version v6.0.0
+ * @version 6.4.1
  */
 class Markdown extends BaseRenderer
 {
@@ -29,6 +29,14 @@ class Markdown extends BaseRenderer
     public function name($value = '')
     {
         return $this->set('name', $value);
+    }
+
+    /**
+     * 设置 Markdown 的配置
+     */
+    public function options($value = '')
+    {
+        return $this->set('options', $value);
     }
 
     /**

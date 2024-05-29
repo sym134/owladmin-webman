@@ -3,7 +3,6 @@
 namespace plugin\jzadmin\support\CodeGenerator;
 
 use Illuminate\Support\Str;
-use Illuminate\Support\Arr;
 
 class BaseGenerator
 {
@@ -43,7 +42,7 @@ class BaseGenerator
         }
 
         try {
-            return static::$files[$path] = (array)json_decode(appw('files')->get($path), true);
+            return static::$files[$path] = (array)json_decode(app('files')->get($path), true);
         } catch (\Throwable $e) {
         }
 
@@ -63,19 +62,18 @@ class BaseGenerator
         } catch (\Throwable $e) {
         }
 
-        $class = trim($class, '\\');
-
-        $composer = self::fromJson(base_path('composer.json'));
-
-        $map = collect(Arr::get($composer, 'autoload.psr-4', []))->mapWithKeys(function ($path, $namespace) {
-            $namespace = trim($namespace, '\\') . '\\';
-
-            return [$namespace => [$namespace, $path]];
-        })->sortBy(function ($_, $namespace) {
-            return strlen($namespace);
-        }, SORT_REGULAR, true);
-
-        $prefix = explode($class, '\\')[0];
+        $class        = trim($class, '\\');
+        $autoloadFile = base_path('/vendor/autoload.php');
+        $loader       = require $autoloadFile;
+        $prefix       = explode($class, '\\')[0];
+        // 获取并处理命名空间和路径映射
+        $map = collect($loader->getPrefixesPsr4())
+            ->mapWithKeys(function ($path, $namespace) {
+                $namespace = trim($namespace, '\\') . '\\';
+                $path      = str_replace([base_path() . '/', base_path() . '\\'], '', realpath(current($path)) . '/');
+                return [$namespace => [$namespace, $path]];
+            })
+            ->sortKeysDesc(SORT_STRING);
 
         if ($map->isEmpty()) {
             if (Str::startsWith($class, 'App\\')) {
@@ -93,8 +91,8 @@ class BaseGenerator
         }
 
         [$namespace, $path] = $values;
-
-        return base_path(str_replace([$namespace, '\\'], [$path, '/'], $class)) . '.php';
+        return base_path(str_replace(["/", $namespace, '\\'], ["\\", $path, '/'], $class)) . '.php';
+        return base_path(str_replace([$namespace, '\\'], [$path, '/'], $class)) . '.php'; // webman
     }
 
     public static function slug(string $name, string $symbol = '-'): array|string

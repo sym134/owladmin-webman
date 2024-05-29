@@ -21,8 +21,12 @@ class Menu
         return array_merge($this->list2Menu($menus), $this->extra());
     }
 
-    private function userMenus()
+    public function userMenus()
     {
+        if (!Admin::config('admin.auth.enable')) {
+            return collect([]);
+        }
+
         $user = Admin::user();
         if ($user->isAdministrator() || Admin::config('admin.auth.permission') === false) {
             $list = AdminMenuService::make()->query()->orderBy('order')->get();
@@ -40,20 +44,31 @@ class Menu
         return $list;
     }
 
-    private function list2Menu($list, $parentId = 0, $parentName = ''): array
+    public function list2Menu($list, $parentId = 0, $parentName = ''): array
     {
         $data = [];
         foreach ($list as $key => $item) {
             if ($item['parent_id'] == $parentId) {
+                $_component = match ($item['url_type']) {
+                    Admin::adminMenuModel()::TYPE_IFRAME => 'iframe',
+                    Admin::adminMenuModel()::TYPE_PAGE => 'amis',
+                    default => data_get($item, 'component') ?? 'amis'
+                };
+
+
                 $idStr = "[{$item['id']}]";
                 $_temp = [
-                    'name'      => $parentName ? $parentName . '-' . $idStr : $idStr,
-                    'path'      => $item['url'],
-                    'component' => data_get($item, 'component') ?? 'amis',
-                    'is_home'   => $item['is_home'],
-                    'is_full'   => $item['is_full'] ?? 0,
-                    'is_link'   => $item['url_type'] == Admin::adminMenuModel()::TYPE_LINK,
-                    'meta'      => [
+                    'name'       => $parentName ? $parentName . '-' . $idStr : $idStr,
+                    'path'       => $item['url'],
+                    'component'  => $_component,
+                    'is_home'    => $item['is_home'],
+                    'iframe_url' => $item['iframe_url'] ?? '',
+                    'url_type'   => $item['url_type'] ?? Admin::adminMenuModel()::TYPE_ROUTE,
+                    'keep_alive' => $item['keep_alive'] ?? 0,
+                    'is_full'    => $item['is_full'] ?? 0,
+                    'is_link'    => $item['url_type'] == Admin::adminMenuModel()::TYPE_LINK,
+                    'page_sign'  => $item['url_type'] == Admin::adminMenuModel()::TYPE_PAGE ? data_get($item, 'component') : '',
+                    'meta'       => [
                         'title' => $item['title'],
                         'icon'  => $item['icon'] ?? '-',
                         'hide'  => $item['visible'] == 0,
@@ -69,7 +84,7 @@ class Menu
                 }
 
                 $data[] = $_temp;
-                if (!in_array($_temp['path'], Admin::config('admin.route.without_extra_routes'))) {
+                if (!in_array($_temp['path'], Admin::config('admin.route.without_extra_routes')) && $item['url_type'] != Admin::adminMenuModel()::TYPE_PAGE) {
                     array_push($data, ...$this->generateRoute($_temp));
                 }
                 unset($list[$key]);
@@ -78,7 +93,7 @@ class Menu
         return $data;
     }
 
-    private function generateRoute($item): array
+    public function generateRoute($item): array
     {
         $url = $item['path'] ?? '';
         $url = preg_replace('/\?.*/', '', $url);
@@ -90,11 +105,11 @@ class Menu
         $menu = fn($action, $path) => [
             'name'      => $item['name'] . '-' . $action,
             'path'      => $url . $path,
-            'component' => 'amis',
+            'component' => $item['url_type'] == 3 ? 'iframe' : (data_get($item, 'component') ?? 'amis'),
             'meta'      => [
                 'hide'  => true,
                 'icon'  => Arr::get($item, 'meta.icon'),
-                'title' => Arr::get($item, 'meta.title') . ' - ' . __('admin.' . $action),
+                'title' => Arr::get($item, 'meta.title') . ' - ' . admin_trans('admin.' . $action),
             ],
         ];
 
@@ -112,7 +127,7 @@ class Menu
         return $this;
     }
 
-    private function formatItem($item)
+    public function formatItem($item)
     {
         return array_merge([
             'title'     => '',
@@ -132,21 +147,23 @@ class Menu
      *
      * @return array|array[]
      */
-    private function extra()
+    public function extra()
     {
-        $extraMenus = [
-            [
+        $extraMenus = [];
+
+        if (Admin::config('admin.auth.enable')) {
+            $extraMenus[] = [
                 'name'      => 'user_setting',
                 'path'      => '/user_setting',
                 'component' => 'amis',
                 'meta'      => [
                     'hide'         => true,
-                    'title'        => __('admin.user_setting'),
+                    'title'        => admin_trans('admin.user_setting'),
                     'icon'         => 'material-symbols:manage-accounts',
                     'singleLayout' => 'basic',
                 ],
-            ],
-        ];
+            ];
+        }
 
         if (Admin::config('admin.show_development_tools')) {
             $extraMenus = array_merge($extraMenus, $this->devToolMenus());
@@ -160,7 +177,7 @@ class Menu
      *
      * @return array[]
      */
-    private function devToolMenus()
+    public function devToolMenus()
     {
         return [
             [
@@ -168,26 +185,44 @@ class Menu
                 'path'      => '/dev_tools',
                 'component' => 'amis',
                 'meta'      => [
-                    'title' => __('admin.developer'),
+                    'title' => admin_trans('admin.developer'),
                     'icon'  => 'fluent:window-dev-tools-20-regular',
                 ],
                 'children'  => [
-                    [
-                        'name'      => 'config',
-                        'path'      => '/dev_tools/config',
-                        'component' => 'amis',
-                        'meta'      => [
-                            'title' => '字典管理',
-                            'icon'  => 'icon-park-outline:database-config',
-                        ],
-                    ],
                     [
                         'name'      => 'dev_tools_extensions',
                         'path'      => '/dev_tools/extensions',
                         'component' => 'amis',
                         'meta'      => [
-                            'title' => __('admin.extensions.menu'),
+                            'title' => admin_trans('admin.extensions.menu'),
                             'icon'  => 'ion:extension-puzzle-outline',
+                        ],
+                    ],
+                    [
+                        'name'      => 'dev_tools_pages',
+                        'path'      => '/dev_tools/pages',
+                        'component' => 'amis',
+                        'meta'      => [
+                            'title' => admin_trans('admin.pages.menu'),
+                            'icon'  => 'iconoir:multiple-pages',
+                        ],
+                    ],
+                    [
+                        'name'      => 'dev_tools_relationships',
+                        'path'      => '/dev_tools/relationships',
+                        'component' => 'amis',
+                        'meta'      => [
+                            'title' => admin_trans('admin.relationships.menu'),
+                            'icon'  => 'ant-design:node-index-outlined',
+                        ],
+                    ],
+                    [
+                        'name'      => 'dev_tools_apis',
+                        'path'      => '/dev_tools/apis',
+                        'component' => 'amis',
+                        'meta'      => [
+                            'title' => admin_trans('admin.apis.menu'),
+                            'icon'  => 'ant-design:api-outlined',
                         ],
                     ],
                     [
@@ -195,7 +230,7 @@ class Menu
                         'path'      => '/dev_tools/code_generator',
                         'component' => 'amis',
                         'meta'      => [
-                            'title' => __('admin.code_generator'),
+                            'title' => admin_trans('admin.code_generator'),
                             'icon'  => 'ic:baseline-code',
                         ],
                     ],
@@ -204,7 +239,7 @@ class Menu
                         'path'      => '/dev_tools/editor',
                         'component' => 'editor',
                         'meta'      => [
-                            'title' => __('admin.visual_editor'),
+                            'title' => admin_trans('admin.visual_editor'),
                             'icon'  => 'mdi:monitor-edit',
                         ],
                     ],

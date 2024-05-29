@@ -6,7 +6,7 @@ namespace plugin\jzadmin\renderer;
  * RowSelection
  *
  * @author  slowlyo
- * @version v6.0.0
+ * @version 6.4.1
  */
 class RowSelection extends BaseRenderer
 {

@@ -2,18 +2,24 @@
 
 namespace plugin\jzadmin\model;
 
-use plugin\jzadmin\Admin;
-use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Support\Collection;
-use Illuminate\Auth\Authenticatable;
-use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
-use Illuminate\Foundation\Auth\User;
 use support\Model;
+use plugin\jzadmin\Admin;
+
+// use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Support\Collection;
+
+// use Illuminate\Auth\Authenticatable;
+// use Illuminate\Foundation\Auth\User;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use plugin\jzadmin\trait\DatetimeFormatterTrait;
+use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 
 class AdminUser extends Model
 {
-    // use Authenticatable, HasApiTokens;
+    // use Authenticatable, HasApiTokens, DatetimeFormatterTrait;
+
+    protected $appends = ['administrator'];
+    protected $guarded = [];
 
     public function __construct(array $attributes = [])
     {
@@ -22,21 +28,14 @@ class AdminUser extends Model
         parent::__construct($attributes);
     }
 
-    protected $guarded = [];
-
-    protected function serializeDate(\DateTimeInterface $date): string
-    {
-        return $date->format($this->getDateFormat());
-    }
-
-    public function roles(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function roles()
     {
         return $this->belongsToMany(AdminRole::class, 'admin_role_users', 'user_id', 'role_id')->withTimestamps();
     }
 
     public function avatar(): Attribute
     {
-        $storage = \Shopwwi\WebmanFilesystem\Facade\Storage::adapter(Admin::config('admin.upload.disk'));
+        $storage = \Shopwwi\WebmanFilesystem\Facade\Storage::adapter(Admin::config('admin.upload.disk')); // webman Storage::adapter
 
         return Attribute::make(
             get: fn($value) => $value ? admin_resource_full_path($value) : url(Admin::config('admin.default_avatar')),
@@ -98,5 +97,10 @@ class AdminUser extends Model
         $roles = array_column($roles, 'slug');
 
         return $this->inRoles($roles);
+    }
+
+    public function administrator(): Attribute
+    {
+        return Attribute::get(fn() => $this->isAdministrator());
     }
 }

@@ -1,5 +1,7 @@
 <?php
-
+use Illuminate\Database\Capsule\Manager;
+$capsule = new Manager();
+$capsule->addConnection(config('database.connections.mysql'));
 return [
     // 应用名称
     'name'           => 'Owl Admin',
@@ -11,7 +13,7 @@ return [
     'default_avatar' => '/admin-assets/default-avatar.png',
 
     // 应用安装目录
-    'directory'      => app_path('Admin'),
+    'directory'      => app_path('admin'), // webman
 
     // 引导文件
     // 'bootstrap'      => app_path('Admin/bootstrap.php'),
@@ -20,7 +22,7 @@ return [
     'route'          => [
         'prefix'               => 'admin-api',
         'domain'               => null,
-        'namespace'            => 'App\\Admin\\Controllers',
+        'namespace'            => 'app\\admin\\controller', // webman
         'middleware'           => ['admin'],
         // 不包含额外路由, 配置后, 不会追加新增/详情/编辑页面路由
         'without_extra_routes' => [
@@ -30,7 +32,7 @@ return [
 
     'auth' => [
         // 是否开启验证码
-        // 'login_captcha' => env('ADMIN_LOGIN_CAPTCHA', true),
+        'login_captcha' => env('ADMIN_LOGIN_CAPTCHA', true),
         // 是否开启认证
         'enable'        => true,
         // 是否开启鉴权
@@ -45,7 +47,7 @@ return [
         'providers'     => [
             'admin' => [
                 'driver' => 'eloquent',
-                'model'  => \plugin\jzadmin\model\AdminUser::class,
+                'model'  => \plugin\jzadmin\model\AdminUser::class, // webman
             ],
         ],
         'except'        => [
@@ -63,13 +65,13 @@ return [
         ],
     ],
 
-    // 'https'                                => env('ADMIN_HTTPS', false),
+    'https'                                => env('ADMIN_HTTPS', false),
 
     // 是否显示 [开发者工具]
-    // 'show_development_tools'               => env('ADMIN_SHOW_DEVELOPMENT_TOOLS', true),
+    'show_development_tools'               => env('ADMIN_SHOW_DEVELOPMENT_TOOLS', true),
 
     // 是否显示 [权限] 功能中的自动生成按钮
-    // 'show_auto_generate_permission_button' => env('ADMIN_SHOW_AUTO_GENERATE_PERMISSION_BUTTON', true),
+    'show_auto_generate_permission_button' => env('ADMIN_SHOW_AUTO_GENERATE_PERMISSION_BUTTON', true),
 
     // 扩展
     'extension'                            => [
@@ -111,7 +113,7 @@ return [
     ],
 
     'database' => [
-        // 'connection' => env('DB_CONNECTION', 'mysql'),
+        'connection' => env('DB_CONNECTION', 'mysql'),
     ],
 
     'models' => [
@@ -123,4 +125,15 @@ return [
 
     'modules' => [
     ],
+
+    // webman
+    'migrate'=>[
+        'default_environment' => 'developpment',
+        'paths' => [
+            "migrations" => "database/migrations",
+            "seeds"      => "database/seeders"
+        ],
+        'migration_table' => 'migrations',
+        'db' => $capsule->getDatabaseManager()
+    ]
 ];

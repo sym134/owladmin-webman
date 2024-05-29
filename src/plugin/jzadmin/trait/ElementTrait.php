@@ -3,42 +3,32 @@
 namespace plugin\jzadmin\trait;
 
 use plugin\jzadmin\Admin;
-use plugin\jzadmin\renderer\Page;
-use plugin\jzadmin\renderer\Form;
-use plugin\jzadmin\renderer\Button;
-use plugin\jzadmin\renderer\Dialog;
-use plugin\jzadmin\renderer\CRUDTable;
-use plugin\jzadmin\renderer\Operation;
-use plugin\jzadmin\renderer\LinkAction;
-use plugin\jzadmin\renderer\AjaxAction;
-use plugin\jzadmin\renderer\OtherAction;
-use plugin\jzadmin\renderer\DialogAction;
+
 
 trait ElementTrait
 {
     /**
      * 基础页面
      *
-     * @return Page
+     * @return \plugin\jzadmin\renderer\Page
      */
-    protected function basePage(): Page
+    protected function basePage()
     {
-        return Page::make()->className('m:overflow-auto');
+        return amis()->Page()->className('m:overflow-auto');
     }
 
     /**
      * 返回列表按钮
      *
-     * @return OtherAction|null
+     * @return \plugin\jzadmin\renderer\OtherAction
      */
-    protected function backButton(): OtherAction|null
+    protected function backButton()
     {
         $path   = str_replace(Admin::config('admin.route.prefix'), '', request()->path());
-        $script =
-            sprintf('window.$owl.hasOwnProperty(\'closeTabByPath\') && window.$owl.closeTabByPath(\'%s\')', $path);
+        $script = sprintf('window.$owl.hasOwnProperty(\'closeTabByPath\') && window.$owl.closeTabByPath(\'%s\')', $path);
 
-        return OtherAction::make()
-            ->label(__('admin.back'))
+        return amis()->OtherAction()
+            ->label(admin_trans('admin.back'))
             ->icon('fa-solid fa-chevron-left')
             ->level('primary')
             ->onClick('window.history.back();' . $script);
@@ -46,16 +36,26 @@ trait ElementTrait
 
     /**
      * 批量删除按钮
-     *
-     * @return AjaxAction
      */
-    protected function bulkDeleteButton(): AjaxAction
+    protected function bulkDeleteButton()
     {
-        return AjaxAction::make()
-            ->api($this->getBulkDeletePath())
+        return amis()->DialogAction()
+            ->label(admin_trans('admin.delete'))
             ->icon('fa-solid fa-trash-can')
-            ->label(__('admin.delete'))
-            ->confirmText(__('admin.confirm_delete'));
+            ->dialog(
+                amis()->Dialog()
+                    ->title(admin_trans('admin.delete'))
+                    ->className('py-2')
+                    ->actions([
+                        amis()->Action()->actionType('cancel')->label(admin_trans('admin.cancel')),
+                        amis()->Action()->actionType('submit')->label(admin_trans('admin.delete'))->level('danger'),
+                    ])
+                    ->body([
+                        amis()->Form()->wrapWithPanel(false)->api($this->getBulkDeletePath())->body([
+                            amis()->Tpl()->className('py-2')->tpl(admin_trans('admin.confirm_delete')),
+                        ]),
+                    ])
+            );
     }
 
     /**
@@ -64,21 +64,21 @@ trait ElementTrait
      * @param bool   $dialog
      * @param string $dialogSize
      *
-     * @return DialogAction|LinkAction
+     * @return \plugin\jzadmin\renderer\DialogAction|\plugin\jzadmin\renderer\LinkAction
      */
-    protected function createButton(bool $dialog = false, string $dialogSize = ''): DialogAction|LinkAction
+    protected function createButton(bool $dialog = false, string $dialogSize = '')
     {
         if ($dialog) {
-            $form = $this->form(false)->api($this->getStorePath())->onEvent([]);
+            $form = $this->form(false)->canAccessSuperData(false)->api($this->getStorePath())->onEvent([]);
 
-            $button = DialogAction::make()->dialog(
-                Dialog::make()->title(__('admin.create'))->body($form)->size($dialogSize)
+            $button = amis()->DialogAction()->dialog(
+                amis()->Dialog()->title(admin_trans('admin.create'))->body($form)->size($dialogSize)
             );
         } else {
-            $button = LinkAction::make()->link($this->getCreatePath());
+            $button = amis()->LinkAction()->link($this->getCreatePath());
         }
 
-        return $button->label(__('admin.create'))->icon('fa fa-add')->level('primary');
+        return $button->label(admin_trans('admin.create'))->icon('fa fa-add')->level('primary');
     }
 
     /**
@@ -87,9 +87,9 @@ trait ElementTrait
      * @param bool   $dialog
      * @param string $dialogSize
      *
-     * @return DialogAction|LinkAction
+     * @return \plugin\jzadmin\renderer\DialogAction|\plugin\jzadmin\renderer\LinkAction
      */
-    protected function rowEditButton(bool $dialog = false, string $dialogSize = ''): DialogAction|LinkAction
+    protected function rowEditButton(bool $dialog = false, string $dialogSize = '')
     {
         if ($dialog) {
             $form = $this->form(true)
@@ -98,14 +98,14 @@ trait ElementTrait
                 ->redirect('')
                 ->onEvent([]);
 
-            $button = DialogAction::make()->dialog(
-                Dialog::make()->title(__('admin.edit'))->body($form)->size($dialogSize)
+            $button = amis()->DialogAction()->dialog(
+                amis()->Dialog()->title(admin_trans('admin.edit'))->body($form)->size($dialogSize)
             );
         } else {
-            $button = LinkAction::make()->link($this->getEditPath());
+            $button = amis()->LinkAction()->link($this->getEditPath());
         }
 
-        return $button->label(__('admin.edit'))->icon('fa-regular fa-pen-to-square')->level('link');
+        return $button->label(admin_trans('admin.edit'))->icon('fa-regular fa-pen-to-square')->level('link');
     }
 
     /**
@@ -114,34 +114,45 @@ trait ElementTrait
      * @param bool   $dialog
      * @param string $dialogSize
      *
-     * @return DialogAction|LinkAction
+     * @return \plugin\jzadmin\renderer\DialogAction|\plugin\jzadmin\renderer\LinkAction
      */
-    protected function rowShowButton(bool $dialog = false, string $dialogSize = ''): DialogAction|LinkAction
+    protected function rowShowButton(bool $dialog = false, string $dialogSize = '')
     {
         if ($dialog) {
-            $button = DialogAction::make()->dialog(
-                Dialog::make()->title(__('admin.show'))->body($this->detail('$id'))->size($dialogSize)
+            $button = amis()->DialogAction()->dialog(
+                amis()->Dialog()->title(admin_trans('admin.show'))->body($this->detail('$id'))->size($dialogSize)
             );
         } else {
-            $button = LinkAction::make()->link($this->getShowPath());
+            $button = amis()->LinkAction()->link($this->getShowPath());
         }
 
-        return $button->label(__('admin.show'))->icon('fa-regular fa-eye')->level('link');
+        return $button->label(admin_trans('admin.show'))->icon('fa-regular fa-eye')->level('link');
     }
 
     /**
      * 行删除按钮
      *
-     * @return AjaxAction
      */
-    protected function rowDeleteButton(): AjaxAction
+    protected function rowDeleteButton()
     {
-        return AjaxAction::make()
-            ->label(__('admin.delete'))
+        return amis()->DialogAction()
+            ->label(admin_trans('admin.delete'))
             ->icon('fa-regular fa-trash-can')
             ->level('link')
-            ->confirmText(__('admin.confirm_delete'))
-            ->api($this->getDeletePath());
+            ->dialog(
+                amis()->Dialog()
+                    ->title()
+                    ->className('py-2')
+                    ->actions([
+                        amis()->Action()->actionType('cancel')->label(admin_trans('admin.cancel')),
+                        amis()->Action()->actionType('submit')->label(admin_trans('admin.delete'))->level('danger'),
+                    ])
+                    ->body([
+                        amis()->Form()->wrapWithPanel(false)->api($this->getDeletePath())->body([
+                            amis()->Tpl()->className('py-2')->tpl(admin_trans('admin.confirm_delete')),
+                        ]),
+                    ])
+            );
     }
 
     /**
@@ -150,15 +161,15 @@ trait ElementTrait
      * @param bool   $dialog
      * @param string $dialogSize
      *
-     * @return Operation
+     * @return \plugin\jzadmin\renderer\Operation
      */
-    protected function rowActions(bool|array $dialog = false, string $dialogSize = ''): Operation
+    protected function rowActions(bool|array $dialog = false, string $dialogSize = '')
     {
         if (is_array($dialog)) {
-            return Operation::make()->label(__('admin.actions'))->buttons($dialog);
+            return amis()->Operation()->label(admin_trans('admin.actions'))->buttons($dialog);
         }
 
-        return Operation::make()->label(__('admin.actions'))->buttons([
+        return amis()->Operation()->label(admin_trans('admin.actions'))->buttons([
             $this->rowShowButton($dialog, $dialogSize),
             $this->rowEditButton($dialog, $dialogSize),
             $this->rowDeleteButton(),
@@ -168,16 +179,16 @@ trait ElementTrait
     /**
      * 基础筛选器
      *
-     * @return Form
+     * @return \plugin\jzadmin\renderer\Form
      */
-    protected function baseFilter(): Form
+    protected function baseFilter()
     {
-        return Form::make()
+        return amis()->Form()
             ->panelClassName('base-filter')
             ->title('')
             ->actions([
-                Button::make()->label(__('admin.reset'))->actionType('clear-and-submit'),
-                amis('submit')->label(__('admin.search'))->level('primary'),
+                amis()->Button()->label(admin_trans('admin.reset'))->actionType('clear-and-submit'),
+                amis('submit')->label(admin_trans('admin.search'))->level('primary'),
             ]);
     }
 
@@ -192,11 +203,11 @@ trait ElementTrait
     }
 
     /**
-     * @return CRUDTable
+     * @return \plugin\jzadmin\renderer\CRUDTable
      */
-    protected function baseCRUD(): CRUDTable
+    protected function baseCRUD()
     {
-        $crud = CRUDTable::make()
+        $crud = amis()->CRUDTable()
             ->perPage(20)
             ->affixHeader(false)
             ->filterTogglable()
@@ -233,13 +244,13 @@ trait ElementTrait
      *
      * @param bool $back
      *
-     * @return Form
+     * @return \plugin\jzadmin\renderer\Form
      */
-    protected function baseForm(bool $back = true): Form
+    protected function baseForm(bool $back = true)
     {
         $path = str_replace(Admin::config('admin.route.prefix'), '', request()->path());
 
-        $form = Form::make()->panelClassName('px-48 m:px-0')->title(' ')->mode('horizontal');
+        $form = amis()->Form()->panelClassName('px-48 m:px-0')->title(' ')->mode('horizontal')->promptPageLeave();
 
         if ($back) {
             $form->onEvent([
@@ -259,11 +270,11 @@ trait ElementTrait
     }
 
     /**
-     * @return Form
+     * @return \plugin\jzadmin\renderer\Form
      */
-    protected function baseDetail(): Form
+    protected function baseDetail()
     {
-        return Form::make()
+        return amis()->Form()
             ->panelClassName('px-48 m:px-0')
             ->title(' ')
             ->mode('horizontal')
@@ -276,92 +287,67 @@ trait ElementTrait
      *
      * @param $crud
      *
-     * @return Page
+     * @return \plugin\jzadmin\renderer\Page
      */
-    protected function baseList($crud): Page
+    protected function baseList($crud)
     {
-        return $this->basePage()->body($crud);
+        return amis()->Page()->className('m:overflow-auto pb-48')->body($crud);
     }
 
     /**
      * 导出按钮
      *
-     * @return \plugin\jzadmin\renderer\Alert|\plugin\jzadmin\renderer\DropdownButton
+     * @param bool $disableSelectedItem
+     *
+     * @return \plugin\jzadmin\renderer\Service
      */
     protected function exportAction($disableSelectedItem = false)
     {
-        if (!class_exists('\Maatwebsite\Excel\Excel')) {
-            return amis()
-                ->Alert()
-                ->level('warning')
-                ->body(__('admin.export.please_install_laravel_excel'))
-                ->showIcon()
-                ->showCloseButton();
-        }
-
+        // 获取主键名称
         $primaryKey = $this->service->primaryKey();
-
-        $downloadPath   = admin_url('_download_export', true);
-        $exportPath     = $this->getExportPath();
-        $pageNoData     = __('admin.export.page_no_data');
-        $selectedNoData = __('admin.export.selected_rows_no_data');
-        $event          = fn($script) => ['click' => ['actions' => [['actionType' => 'custom', 'script' => $script]]]];
-        $doAction       = <<<JS
-doAction([
-    { actionType: "ajax", args: { api: { url: url.toString(), method: "get" } } },
-    {
-        actionType: "custom",
-        expression: "\${event.data.responseResult.responseStatus === 0}",
-        script: "window.open('{$downloadPath}?path='+event.data.responseResult.responseData.path)"
-    }
-])
-JS;
-        $buttons        = [
-            amis()->VanillaAction()->label(__('admin.export.all'))->onEvent(
-                $event(<<<JS
-let data = event.data.__super.__super
-let params = Object.keys(data).filter(key => key !== "page" && key !== "__super").reduce((obj, key) => {
-    obj[key] = data[key];
-    return obj;
-}, {})
-let url = new URL("{$exportPath}", window.location.origin)
-Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
-{$doAction}
-JS
-
-                )
+        // 下载路径
+        $downloadPath = admin_url('_download_export', true);
+        // 导出接口地址
+        $exportPath = $this->getExportPath();
+        // 无数据提示
+        $pageNoData = admin_trans('admin.export.page_no_data');
+        // 选中行无数据提示
+        $selectedNoData = admin_trans('admin.export.selected_rows_no_data');
+        // 按钮点击事件
+        $event = fn($script) => ['click' => ['actions' => [['actionType' => 'custom', 'script' => $script]]]];
+        // 导出处理动作
+        $doAction = "doAction([{actionType:'setValue',componentId:'export-action',args:{value:{showExportLoading:true}}},{actionType:'ajax',args:{api:{url:url.toString(),method:'get'}}},{actionType:'setValue',componentId:'export-action',args:{value:{showExportLoading:false}}},{actionType:'custom',expression:'\${event.data.responseResult.responseStatus===0}',script:'window.open(\'{$downloadPath}?path=\'+event.data.responseResult.responseData.path)'}])";
+        // 按钮
+        $buttons = [
+            // 导出全部
+            amis()->VanillaAction()->label(admin_trans('admin.export.all'))->onEvent(
+                $event("let data=event.data;let params=Object.keys(data).filter(key=>key!=='page' && key!=='__super').reduce((obj,key)=>{obj[key]=data[key];return obj;},{});let url=new URL('{$exportPath}',window.location.origin);Object.keys(params).forEach(key=>url.searchParams.append(key,params[key]));{$doAction}")
             ),
-            amis()->VanillaAction()->label(__('admin.export.page'))->onEvent(
-                $event(<<<JS
-let ids = event.data.items.map(item => item.{$primaryKey})
-if(ids.length === 0) { return doAction({ actionType: "toast", args: { msgType: "warning", msg: "{$pageNoData}" } }) }
-let url = new URL("{$exportPath}", window.location.origin)
-url.searchParams.append("_ids", ids.join(","))
-{$doAction}
-JS
-                )
+            // 导出本页
+            amis()->VanillaAction()->label(admin_trans('admin.export.page'))->onEvent(
+                $event("let ids=event.data.items.map(item=>item.{$primaryKey});if(ids.length===0){return doAction({actionType:'toast',args:{msgType:'warning',msg:'{$pageNoData}'}})};let url=new URL('{$exportPath}',window.location.origin);url.searchParams.append('_ids',ids.join(','));{$doAction}")
             ),
         ];
-
+        // 导出选中项
         if (!$disableSelectedItem) {
-            $buttons[] = amis()->VanillaAction()->label(__('admin.export.selected_rows'))->onEvent(
-                $event(<<<JS
-let ids = event.data.selectedItems.map(item => item.{$primaryKey})
-if(ids.length === 0) { return doAction({ actionType: "toast", args: { msgType: "warning", msg: "{$selectedNoData}" } }) }
-let url = new URL("{$exportPath}", window.location.origin)
-url.searchParams.append("_ids", ids.join(","))
-{$doAction}
-JS
-                )
+            $buttons[] = amis()->VanillaAction()->label(admin_trans('admin.export.selected_rows'))->onEvent(
+                $event("let ids=event.data.selectedItems.map(item=>item.{$primaryKey});if(ids.length===0){return doAction({actionType:'toast',args:{msgType:'warning',msg:'{$selectedNoData}'}})};let url=new URL('{$exportPath}',window.location.origin);url.searchParams.append('_ids',ids.join(','));{$doAction}")
             );
         }
 
-        return amis()
-            ->DropdownButton()
-            ->label(__('admin.export.title'))
-            ->set('icon', 'fa-solid fa-download')
-            ->buttons($buttons)
-            ->align('right')
-            ->closeOnClick();
+        return amis()->Service()
+            ->id('export-action')
+            ->set('align', 'right')
+            ->set('data', ['showExportLoading' => false])
+            ->body(
+                amis()->Spinner()->set('showOn', '${showExportLoading}')->overlay()->body(
+                    amis()->DropdownButton()
+                        ->label(admin_trans('admin.export.title'))
+                        ->set('icon', 'fa-solid fa-download')
+                        ->buttons($buttons)
+                        ->closeOnClick()
+                        ->align('right')
+                )
+            );
     }
 }

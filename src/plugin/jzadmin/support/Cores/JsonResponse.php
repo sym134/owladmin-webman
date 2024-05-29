@@ -2,8 +2,8 @@
 
 namespace plugin\jzadmin\support\Cores;
 
-use Illuminate\Http\Resources\Json\JsonResource;
-use support\Response;
+// use Illuminate\Http\Resources\Json\JsonResource; // webman
+use support\Response; // webman
 
 class JsonResponse
 {
@@ -24,16 +24,16 @@ class JsonResponse
     {
         $this->setFailMsg($message);
 
-        return $this->json(array_merge($this->additionalData, ['data' => $data]));
+        return $this->json($data);
     }
 
     /**
      * @param null   $data
      * @param string $message
      *
-     * @return \Illuminate\Http\JsonResponse|Response
+     * @return Response
      */
-    public function success($data = null, string $message = '')
+    public function success($data = null, string $message = ''): Response
     {
         $this->setSuccessMsg($message);
 
@@ -45,7 +45,17 @@ class JsonResponse
             $data = (object)$data;
         }
 
-        return $this->json(array_merge($this->additionalData, ['data' => $data]));
+        return $this->json($data);
+    }
+
+    private function json($data): Response
+    {
+        if (config('app.debug')) {
+            $this->additionalData['_debug'] = [
+                // 'sql' => sql_record(), // todo
+            ];
+        }
+        return json(array_merge($this->additionalData, ['data' => $data])); // webman json()
     }
 
     /**
@@ -65,7 +75,7 @@ class JsonResponse
 
     private function setFailMsg($message)
     {
-        $this->additionalData['msg'] = $message;
+        $this->additionalData['msg']    = $message;
         $this->additionalData['status'] = 1;
     }
 
@@ -105,10 +115,5 @@ class JsonResponse
         $this->additionalData['doNotDisplayToast'] = $value;
 
         return $this;
-    }
-
-    public function json($data, int $options = JSON_UNESCAPED_UNICODE): Response
-    {
-        return new Response(200, ['Content-Type' => 'application/json'], json_encode($data, $options));
     }
 }

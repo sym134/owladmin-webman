@@ -15,17 +15,19 @@ class AdminMenuService extends AdminService
 {
     public function __construct()
     {
+        parent::__construct();
+
         $this->modelName = Admin::adminMenuModel();
     }
 
-    public function getTree(): array
+    public function getTree()
     {
         $list = $this->query()->orderBy('order')->get()->toArray();
 
         return array2tree($list);
     }
 
-    public function parentIsChild($id, $parent_id): bool
+    public function parentIsChild($id, $parent_id)
     {
         $parent = $this->query()->find($parent_id);
 
@@ -40,21 +42,23 @@ class AdminMenuService extends AdminService
         return false;
     }
 
-    public function update($primaryKey, $data): bool
+    public function update($primaryKey, $data)
     {
         $columns = $this->getTableColumns();
 
         $parent_id = Arr::get($data, 'parent_id');
         if ($parent_id != 0) {
-            amis_abort_if($this->parentIsChild($primaryKey, $parent_id), __('admin.admin_menu.parent_id_not_allow'));
+            amis_abort_if($this->parentIsChild($primaryKey, $parent_id), admin_trans('admin.admin_menu.parent_id_not_allow'));
         }
 
         $model = $this->query()->whereKey($primaryKey)->first();
 
+        $data['id'] = $primaryKey;
+
         return $this->saveData($data, $columns, $model);
     }
 
-    public function store($data): bool
+    public function store($data)
     {
         $columns = $this->getTableColumns();
 
@@ -80,8 +84,15 @@ class AdminMenuService extends AdminService
      *
      * @return bool
      */
-    protected function saveData($data, array $columns, AdminMenu $model): bool
+    protected function saveData($data, array $columns, AdminMenu $model)
     {
+        $urlExists = $this->query()
+            ->where('url', data_get($data, 'url'))
+            ->when(data_get($data, 'id'), fn($q) => $q->where('id', '<>', data_get($data, 'id')))
+            ->exists();
+
+        admin_abort_if($urlExists, admin_trans('admin.admin_menu.url_exists'));
+
         foreach ($data as $k => $v) {
             if (!in_array($k, $columns)) {
                 continue;
@@ -97,5 +108,42 @@ class AdminMenuService extends AdminService
         }
 
         return $model->save();
+    }
+
+    /**
+     * 重新排序菜单
+     *
+     * @param $ids
+     *
+     * @return false|int
+     */
+    public function reorder($ids)
+    {
+        if (blank($ids)) {
+            return false;
+        }
+
+        $ids = json_decode('[' . str_replace('[', ',[', $ids) . ']');
+
+        $list = collect($this->refreshOrder($ids))->transform(fn($i) => $i * 10)->all();
+
+        $sql = 'update ' . $this->getModel()->getTable() . ' set `order` = case id ';
+
+        foreach ($list as $k => $v) {
+            $sql .= " when {$k} then {$v} ";
+        }
+
+        return DB::update($sql . ' else `order` end');
+    }
+
+    public function refreshOrder($list)
+    {
+        $result = collect($list)->filter(fn($i) => !is_array($i))->values()->flip()->toArray();
+
+        collect($list)->filter(fn($i) => is_array($i))->each(function ($item) use (&$result) {
+            $result = $this->refreshOrder($item) + $result;
+        });
+
+        return $result;
     }
 }

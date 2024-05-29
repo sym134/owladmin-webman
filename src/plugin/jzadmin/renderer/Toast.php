@@ -6,7 +6,7 @@ namespace plugin\jzadmin\renderer;
  * Toast 轻提示
  *
  * @author  slowlyo
- * @version v6.0.0
+ * @version 6.4.1
  */
 class Toast extends BaseRenderer
 {
@@ -49,7 +49,7 @@ class Toast extends BaseRenderer
     }
 
     /**
-     * 提示显示位置，可选值: top-right | top-center | top-left | bottom-center | bottom-left | bottom-right | center
+     * 提示显示位置，可选值: top-right | top-center | top-left | bottom-center | bottom-left | bottom-right | center 可选值: top-right | top-center | top-left | bottom-center | bottom-left | bottom-right | center
      */
     public function position($value = '')
     {

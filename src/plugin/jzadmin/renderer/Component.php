@@ -12,7 +12,7 @@ namespace plugin\jzadmin\renderer;
  */
 class Component extends BaseRenderer
 {
-    public function setType($type): static
+    public function setType($type)
     {
         return $this->set('type', $type);
     }

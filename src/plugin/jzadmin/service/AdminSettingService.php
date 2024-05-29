@@ -4,8 +4,9 @@ namespace plugin\jzadmin\service;
 
 use Illuminate\Support\Arr;
 use plugin\jzadmin\Admin;
-use support\Cache;
 use support\Db;
+use support\Cache;
+
 use plugin\jzadmin\model\AdminSetting;
 
 class AdminSettingService extends AdminService
@@ -73,13 +74,13 @@ class AdminSettingService extends AdminService
      */
     public function adminSetMany(array $data)
     {
-        $prefix = __('admin.save');
+        $prefix = admin_trans('admin.save');
 
         if ($this->setMany($data)) {
-            return Admin::response()->successMessage($prefix . __('admin.successfully'));
+            return Admin::response()->successMessage($prefix . admin_trans('admin.successfully'));
         }
 
-        return Admin::response()->fail($prefix . __('admin.failed'), $this->getError());
+        return Admin::response()->fail($prefix . admin_trans('admin.failed'), $this->getError());
     }
 
     /**
@@ -107,11 +108,9 @@ class AdminSettingService extends AdminService
             return $this->query()->where('key', $key)->value('values') ?? $default;
         }
 
-        $value = Cache::get($this->getCacheKey($key));
-        if (empty($value)) {
-            $value = $this->query()->where('key', $key)->value('values');
-            Cache::set($this->getCacheKey($key), $value);
-        }
+        $value = cache()->rememberForever($this->getCacheKey($key), function () use ($key) { // webman cache()->rememberForever
+            return $this->query()->where('key', $key)->value('values');
+        });
 
         return $value ?? $default;
     }
@@ -163,7 +162,7 @@ class AdminSettingService extends AdminService
      */
     public function clearCache($key)
     {
-        Cache::delete($this->getCacheKey($key));
+        Cache::delete($this->getCacheKey($key)); // webman
     }
 
     public function getCacheKey($key)

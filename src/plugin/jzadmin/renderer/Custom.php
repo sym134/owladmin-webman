@@ -6,7 +6,7 @@ namespace plugin\jzadmin\renderer;
  * Custom 自定义组件
  *
  * @author  slowlyo
- * @version v6.0.0
+ * @version 6.4.1
  */
 class Custom extends BaseRenderer
 {

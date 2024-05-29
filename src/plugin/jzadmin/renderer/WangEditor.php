@@ -8,7 +8,7 @@ use plugin\jzadmin\trait\UploadTrait;
  * WangEditor
  *
  * @author  slowlyo
- * @version v6.0.0
+ * @version 6.4.1
  */
 class WangEditor extends BaseRenderer
 {

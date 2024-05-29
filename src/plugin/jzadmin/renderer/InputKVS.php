@@ -6,7 +6,7 @@ namespace plugin\jzadmin\renderer;
  * InputKVS 键值对象
  *
  * @author  slowlyo
- * @version v6.0.0
+ * @version 6.4.1
  */
 class InputKVS extends BaseRenderer
 {

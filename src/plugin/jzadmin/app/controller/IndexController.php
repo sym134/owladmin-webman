@@ -9,7 +9,8 @@ class IndexController
 
     public function index()
     {
-        return view('index/index', ['name' => 'jzadmin']);
+        return view('admin-assets/index');
+        // return view('index/index', ['name' => 'jzadmin']);
     }
 
 }

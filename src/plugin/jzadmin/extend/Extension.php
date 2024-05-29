@@ -3,8 +3,10 @@
 namespace plugin\jzadmin\extend;
 
 use Illuminate\Support\Str;
+use plugin\jzadmin\Admin;
 use plugin\jzadmin\support\Helper;
 use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Facades\Schema;
 use plugin\jzadmin\trait\ErrorTrait;
 
 class Extension
@@ -37,6 +39,11 @@ class Extension
         return new self();
     }
 
+    public static function tableExists()
+    {
+        return Admin::hasTable('admin_extensions');
+    }
+
     /**
      * Execute the console command.
      *
@@ -47,11 +54,11 @@ class Extension
      */
     public function createDir($name, $namespace)
     {
-        amis_abort_if(!preg_match('/^[\w\-_]+\/[\w\-_]+$/', $name), __('admin.extensions.name_invalid'));
+        amis_abort_if(!preg_match('/^[\w\-_]+\/[\w\-_]+$/', $name), admin_trans('admin.extensions.name_invalid'));
 
         $this->dirs[] = 'public/extensions/' . $name;
 
-        $this->filesystem = appw('files');
+        $this->filesystem = app('files');
         $this->namespace  = $namespace;
 
         $this->extensionDir = admin_extension_path();
@@ -65,7 +72,7 @@ class Extension
 
         $this->basePath = rtrim($this->extensionDir, '/') . '/' . ltrim($this->package, '/');
 
-        amis_abort_if(is_dir($this->basePath), __('admin.extensions.exists') . $this->package);
+        amis_abort_if(is_dir($this->basePath), admin_trans('admin.extensions.exists') . $this->package);
 
         $this->makeDir($this->dirs);
         $this->makeFiles();

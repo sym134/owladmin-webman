@@ -1,10 +1,17 @@
 <?php
+
 use plugin\jzadmin\facade\Crypt;
+
+// webman
+use plugin\jzadmin\extend\Manager;
 use plugin\jzadmin\support\Context;
+use support\Cache;
+
+
 if (!function_exists('admin_url')) {
     function admin_url($path = null, $needPrefix = false)
     {
-        $prefix = $needPrefix ? '/' . \plugin\jzadmin\Admin::config('admin.route.prefix') : '';
+        $prefix = $needPrefix ? '/' . \plugin\jzadmin\Admin::config('admin.route.prefix') : ''; // webman
 
         return $prefix . '/' . trim($path, '/');
     }
@@ -20,7 +27,7 @@ if (!function_exists('table_columns')) {
      */
     function table_columns($tableName)
     {
-        return \support\Db::schema()->getColumnListing($tableName);
+        return \support\Db::schema()->getColumnListing($tableName); // webman
     }
 }
 
@@ -61,8 +68,8 @@ if (!function_exists('admin_resource_full_path')) {
         } else {
             $disk = \plugin\jzadmin\Admin::config('admin.upload.disk');
 
-            if (\plugin\jzadmin\Admin::config("filesystems.disks.{$disk}")) {
-                $src = \Shopwwi\WebmanFilesystem\Facade\Storage::adapter($disk)->url($path);
+            if (config("filesystems.disks.{$disk}")) {
+                $src = \Illuminate\Support\Facades\Storage::disk($disk)->url($path);
             } else {
                 $src = '';
             }
@@ -78,7 +85,7 @@ if (!function_exists('admin_resource_full_path')) {
 if (!function_exists('admin_path')) {
     function admin_path($path = '')
     {
-        return ucfirst(config('admin.directory')) . ($path ? DIRECTORY_SEPARATOR . $path : $path);
+        return ucfirst(config('plugin.jzadmin.admin.directory')) . ($path ? DIRECTORY_SEPARATOR . $path : $path);
     }
 }
 
@@ -92,7 +99,7 @@ if (!function_exists('amis')) {
     function amis($type = null)
     {
         if (filled($type)) {
-            return \plugin\jzadmin\renderer\Component::make()->setType($type);
+            return \plugin\jzadmin\renderer\Component::make()->setType($type); // webman
         }
 
         return \plugin\jzadmin\renderer\Amis::make();
@@ -113,7 +120,7 @@ if (!function_exists('amisMake')) {
 if (!function_exists('admin_encode')) {
     function admin_encode($str)
     {
-        return Crypt::encryptString($str);
+        return Crypt::encryptString($str);  // webman
     }
 }
 
@@ -121,7 +128,7 @@ if (!function_exists('admin_decode')) {
     function admin_decode($decodeStr)
     {
         try {
-            $str = Crypt::decryptString($decodeStr);
+            $str = Crypt::decryptString($decodeStr);  // webman
         } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
             $str = '';
         }
@@ -139,11 +146,38 @@ if (!function_exists('file_upload_handle')) {
      */
     function file_upload_handle()
     {
-        $storage = \Shopwwi\WebmanFilesystem\Facade\Storage::adapter(\plugin\jzadmin\Admin::config('admin.upload.disk'));
+        $storage = \Shopwwi\WebmanFilesystem\Facade\Storage::adapter(\plugin\jzadmin\Admin::config('admin.upload.disk')); // webman
 
         return \Illuminate\Database\Eloquent\Casts\Attribute::make(
-            get: fn($value) => $value ? $storage->url($value) : '',
+            get: fn($value) => $value ? $storage->url($value) : '', // webman
             set: fn($value) => str_replace($storage->url(''), '', $value)
+        );
+    }
+}
+
+if (!function_exists('file_upload_handle_multi')) {
+    /**
+     * 处理文件上传回显问题 (多个)
+     *
+     * @return \Illuminate\Database\Eloquent\Casts\Attribute
+     */
+    function file_upload_handle_multi()
+    {
+        $storage = \Illuminate\Support\Facades\Storage::disk(\plugin\jzadmin\Admin::config('admin.upload.disk'));
+
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
+            get: function ($value) use ($storage) {
+                return array_map(fn($item) => $item ? admin_resource_full_path($item) : '', explode(',', $value));
+            },
+            set: function ($value) use ($storage) {
+                if (is_string($value)) {
+                    return str_replace($storage->url(''), '', $value);
+                }
+
+                $list = array_map(fn($item) => str_replace($storage->url(''), '', $item), \Illuminate\Support\Arr::wrap($value));
+
+                return implode(',', $list);
+            }
         );
     }
 }
@@ -159,11 +193,7 @@ if (!function_exists('is_json')) {
      */
     function is_json($string)
     {
-        if (!is_string($string)) {
-            return false;
-        }
-        json_decode($string);
-        return (json_last_error() == JSON_ERROR_NONE);
+        return is_string($string) && is_array(json_decode($string, true)) && (json_last_error() == JSON_ERROR_NONE);
     }
 }
 
@@ -182,7 +212,7 @@ if (!function_exists('admin_extension_path')) {
      */
     function admin_extension_path(?string $path = null)
     {
-        $dir = rtrim(config('admin.extension.dir'), '/') ?: base_path('extensions');
+        $dir = rtrim(config('plugin.jzadmin.admin.extension.dir'), '/') ?: base_path('extensions');
 
         $path = ltrim($path, '/');
 
@@ -210,7 +240,7 @@ if (!function_exists('admin_abort')) {
      */
     function admin_abort($message = '', $data = [], $doNotDisplayToast = 0)
     {
-        throw new \plugin\jzadmin\Exceptions\AdminException($message, $data, $doNotDisplayToast);
+        throw new \plugin\jzadmin\exception\AdminException($message, $data, $doNotDisplayToast);
     }
 
     function amis_abort($message = '', $data = [])
@@ -241,18 +271,39 @@ if (!function_exists('admin_abort')) {
     }
 }
 
-// 补充方法
-if (!function_exists('__')) {
+if (!function_exists('owl_admin_path')) {
+    function owl_admin_path($path = '')
+    {
+        $path = ltrim($path, '/');
+
+        return __DIR__ . '/../' . $path;
+    }
+}
+
+if (!function_exists('admin_pages')) {
+    function admin_pages($sign)
+    {
+        return \plugin\jzadmin\service\AdminPageService::make()->get($sign);
+    }
+}
+
+if (!function_exists('map2options')) {
     /**
-     * Translate the given message.
+     * 键作为value, 值作为label, 返回options格式
      *
-     * @param string|null $key
-     * @param array       $replace
-     * @param string|null $locale
+     * @param $map
      *
-     * @return string|array|null
+     * @return array
      */
-    function __(string|null $key = null, array $replace = [], string|null $locale = null)
+    function map2options($map)
+    {
+        return collect($map)->map(fn($v, $k) => ['label' => $v, 'value' => $k])->values()->toArray();
+    }
+}
+
+// webman 版本
+if (!function_exists('admin_trans')) {
+    function admin_trans(string|null $key = null, array $replace = [], string|null $locale = null)
     {
         if (is_null($key)) {
             return $key;
@@ -262,20 +313,13 @@ if (!function_exists('__')) {
     }
 }
 
+// webman 增加
 if (!function_exists('url')) {
-    function url($val)
+    function url($val): string
     {
         return route($val);
     }
 }
-
-if (!function_exists('now')) {
-    function now()
-    {
-        return \Carbon\Carbon::now();
-    }
-}
-
 if (!function_exists('abort')) {
     function abort($code, $message)
     {
@@ -372,6 +416,7 @@ if (!function_exists('laravel_batch_update')) {
      * @param string $table
      * @param array  $list_data
      * @param int    $chunk_size
+     *
      * @return int
      * @throws Exception
      * @author mosquito <zwj1206_hi@163.com> 2020-10-21
@@ -453,14 +498,15 @@ if (!function_exists('runComman')) {
     }
 }
 
-if (!function_exists('appw')) {
-    function appw($name)
+if (!function_exists('app')) {
+    function app($name)
     {
         $arr = [
-            'files'         => \support\Container::make(\Illuminate\Filesystem\Filesystem::class),
-            'admin.context' => \support\Container::make(Context::class),
+            'files'         => \support\Container::make(\Illuminate\Filesystem\Filesystem::class,[]),
+            'admin.context' => \support\Container::make(Context::class,[]),
             'admin.setting' => settings(),
-            'admin.menu'    => \support\Container::make(\Slowlyo\OwlAdmin\Support\Cores\Menu::class),
+            'admin.menu'    => \support\Container::make(\plugin\jzadmin\support\Cores\Menu::class,[]),
+            'admin.extend'  => \support\Container::make(Manager::class,[]),
         ];
         return $arr[$name];
     }
@@ -470,5 +516,12 @@ if (!function_exists('database_path')) {
     function database_path($name)
     {
         return 'database/' . $name;
+    }
+}
+
+if (!function_exists('cache')) {
+    function cache(): \plugin\jzadmin\utils\Cache
+    {
+        return new \plugin\jzadmin\utils\Cache();
     }
 }

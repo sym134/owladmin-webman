@@ -15,14 +15,14 @@ class ServiceGenerator extends BaseGenerator
         $path      = static::guessClassFileName($name);
         $dir       = dirname($path);
 
-        $files = appw('files');
+        $files = app('files');
 
         if (!is_dir($dir)) {
             $files->makeDirectory($dir, 0755, true);
         }
 
         if ($files->exists($path)) {
-            abort(400, "Service [$name] already exists!");
+            abort(400, "Service [$name] already exists!"); // webman
         }
 
         $stub = $files->get($this->stub);
@@ -43,7 +43,7 @@ class ServiceGenerator extends BaseGenerator
     {
         $name      = str_replace('/', '\\', $serviceName);
         $modelName = str_replace('/', '\\', $modelName);
-        $files     = appw('files');
+        $files     = app('files');
         $stub      = $files->get($this->stub);
 
         return $this->replaceClass($stub, $name)

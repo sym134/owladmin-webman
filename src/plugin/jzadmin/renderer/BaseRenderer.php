@@ -19,17 +19,21 @@ class BaseRenderer implements \JsonSerializable
         return new static();
     }
 
-    public function __call($name, $arguments)
+    public function __call($method, $parameters)
     {
-        if (static::hasMacro($name)) {
-            return $this->macroCall($name, $arguments);
+        if (static::hasMacro($method)) {
+            return $this->macroCall($method, $parameters);
         }
 
-        return $this->set($name, array_shift($arguments));
+        return $this->set($method, array_shift($parameters));
     }
 
     public function set($name, $value)
     {
+        if ($name == 'map' && is_array($value) && array_keys($value) == array_keys(array_keys($value))) {
+            $value = (object)$value;
+        }
+
         $this->amisSchema[$name] = $value;
 
         return $this;

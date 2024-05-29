@@ -61,6 +61,11 @@ class UpdateCommand extends Command
         exit;
     }
 
+    public function schema()
+    {
+        return Schema::connection(config('plugin.jzadmin.admin.database.connection'));
+    }
+
     public function version257()
     {
         $this->output->title('Update to version v2.5.7');
@@ -151,5 +156,107 @@ class UpdateCommand extends Command
         }
 
         settings()->set('system_theme_setting');
+    }
+
+    public function version323()
+    {
+        $this->output->title('Update to version v3.2.3');
+
+        if (!$this->schema()->hasColumn('admin_users', 'enabled')) {
+            $this->schema()->table('admin_users', function ($table) {
+                $table->tinyInteger('enabled')->default(1);
+            });
+        }
+
+        if (!$this->updateAll) {
+            $this->call('admin:publish', [
+                '--lang'  => true,
+                '--force' => true,
+            ]);
+        }
+    }
+
+    public function version325()
+    {
+        $this->output->title('Update to version v3.2.5');
+        if (!$this->schema()->hasColumn('admin_code_generators', 'save_path')) {
+            $this->schema()->table('admin_code_generators', function ($table) {
+                $table->text('save_path')->nullable()->comment('保存位置');
+            });
+        }
+
+        if (!$this->updateAll) {
+            $this->call('admin:publish', [
+                '--lang'  => true,
+                '--force' => true,
+            ]);
+        }
+    }
+
+    public function version341()
+    {
+        $this->output->title('Update to version v3.4.1');
+        if (!$this->schema()->hasColumn('admin_menus', 'keep_alive')) {
+            $this->schema()->table('admin_menus', function ($table) {
+                $table->tinyInteger('keep_alive')->nullable()->comment('页面缓存');
+                $table->string('iframe_url')->nullable()->comment('iframe_url');
+            });
+        }
+        if (!$this->updateAll) {
+            $this->call('admin:publish', [
+                '--assets' => true,
+                '--lang'   => true,
+                '--force'  => true,
+            ]);
+        }
+    }
+
+    public function version350()
+    {
+        $this->output->title('Update to version v3.5.0');
+
+        if (!$this->updateAll) {
+            $this->call('admin:publish', [
+                '--assets' => true,
+                '--lang'   => true,
+                '--config' => true,
+                '--force'  => true,
+            ]);
+        }
+
+        if (!$this->schema()->hasTable('admin_pages')) {
+            $this->schema()->create('admin_pages', function ($table) {
+                $table->id();
+                $table->string('title')->comment('页面名称');
+                $table->string('sign')->comment('页面标识');
+                $table->longText('schema')->comment('页面结构');
+                $table->timestamps();
+            });
+        }
+
+        if (!$this->schema()->hasTable('admin_relationships')) {
+            $this->schema()->create('admin_relationships', function ($table) {
+                $table->id();
+                $table->string('model')->comment('模型');
+                $table->string('title')->comment('关联名称');
+                $table->string('type')->comment('关联类型');
+                $table->string('remark')->comment('关联名称')->nullable();
+                $table->text('args')->comment('关联参数')->nullable();
+                $table->text('extra')->comment('额外参数')->nullable();
+                $table->timestamps();
+            });
+        }
+
+        if (!$this->schema()->hasTable('admin_apis')) {
+            $this->schema()->create('admin_apis', function ($table) {
+                $table->id();
+                $table->string('title')->comment('接口名称');
+                $table->string('path')->comment('接口路径');
+                $table->string('template')->comment('接口模板');
+                $table->tinyInteger('enabled')->default(1)->comment('是否启用');
+                $table->longText('args')->comment('接口参数')->nullable();
+                $table->timestamps();
+            });
+        }
     }
 }

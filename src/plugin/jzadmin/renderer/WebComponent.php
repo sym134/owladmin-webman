@@ -6,7 +6,7 @@ namespace plugin\jzadmin\renderer;
  * Web Component
  *
  * @author  slowlyo
- * @version v6.0.0
+ * @version 6.4.1
  */
 class WebComponent extends BaseRenderer
 {

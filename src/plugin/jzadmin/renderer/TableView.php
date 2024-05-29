@@ -6,7 +6,7 @@ namespace plugin\jzadmin\renderer;
  * Table View 表格展现
  *
  * @author  slowlyo
- * @version v6.0.0
+ * @version 6.4.1
  */
 class TableView extends BaseRenderer
 {

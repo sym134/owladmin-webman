@@ -76,7 +76,7 @@ class Composer
         }
 
         try {
-            return static::$files[$path] = (array) json_decode(appw('files')->get($path), true);
+            return static::$files[$path] = (array) json_decode(app('files')->get($path), true);
         } catch (\Throwable $e) {
         }
 

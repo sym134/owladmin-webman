@@ -2,8 +2,12 @@
 
 namespace plugin\jzadmin\service;
 
-use support\Db;
+use support\Db as DB;
+use support\Request;// webman
+use support\Container;
 use Illuminate\Support\Arr;
+use plugin\jzadmin\renderer\Page;
+use Webman\Route;
 use Illuminate\Database\Eloquent\Model;
 use plugin\jzadmin\trait\ErrorTrait;
 use Illuminate\Database\Eloquent\Builder;
@@ -12,19 +16,33 @@ abstract class AdminService
 {
     use ErrorTrait;
 
-    protected $tableColumn;
+    protected static $tableColumn;
 
     protected string $modelName;
+
+    protected Request $request;
+
+    public function __construct()
+    {
+        if (!is_null(request())){
+            $this->request = request();
+        }
+    }
 
     public static function make(): static
     {
         return new static;
     }
 
+    public function setModelName($modelName)
+    {
+        $this->modelName = $modelName;
+    }
+
     /**
      * @return Model
      */
-    public function getModel(): Model
+    public function getModel()
     {
         return new $this->modelName;
     }
@@ -36,15 +54,15 @@ abstract class AdminService
 
     public function getTableColumns()
     {
-        if (!$this->tableColumn) {
-            $this->tableColumn = Db::schema($this->getModel()->getConnectionName())
+        if (!self::$tableColumn) {
+            self::$tableColumn = DB::schema($this->getModel()->getConnectionName()) // webman DB::schema
                 ->getColumnListing($this->getModel()->getTable());
         }
 
-        return $this->tableColumn;
+        return self::$tableColumn;
     }
 
-    public function query(): Builder
+    public function query()
     {
         return $this->modelName::query();
     }
@@ -58,7 +76,11 @@ abstract class AdminService
      */
     public function getDetail($id)
     {
-        return $this->query()->find($id);
+        $query = $this->query();
+
+        $this->addRelations($query, 'detail');
+
+        return $query->find($id);
     }
 
     /**
@@ -68,7 +90,7 @@ abstract class AdminService
      *
      * @return Model|\Illuminate\Database\Eloquent\Collection|Builder|array|null
      */
-    public function getEditData($id): Model|\Illuminate\Database\Eloquent\Collection|Builder|array|null
+    public function getEditData($id)
     {
         $model = $this->getModel();
 
@@ -76,7 +98,11 @@ abstract class AdminService
             ->filter(fn($item) => $item !== null)
             ->toArray();
 
-        return $this->query()->find($id)->makeHidden($hidden);
+        $query = $this->query();
+
+        $this->addRelations($query, 'edit');
+
+        return $query->find($id)->makeHidden($hidden);
     }
 
     /**
@@ -88,11 +114,79 @@ abstract class AdminService
     {
         $query = $this->query();
 
+        // 处理排序
         $this->sortable($query);
 
+        // 自动加载 TableColumn 内的关联关系
+        $this->loadRelations($query);
+
+        // 处理查询
         $this->searchable($query);
 
+        // 追加关联关系
+        $this->addRelations($query);
+
         return $query;
+    }
+
+    /**
+     * 添加关联关系
+     *
+     * 预留钩子, 方便处理只需要添加 [关联] 的情况
+     *
+     * @param        $query
+     * @param string $scene 场景: list, detail, edit
+     *
+     * @return void
+     */
+    public function addRelations($query, string $scene = 'list')
+    {
+
+    }
+
+    /**
+     * 根据 tableColumn 定义的列, 自动加载关联关系
+     *
+     * @param $query
+     *
+     * @return void
+     */
+    public function loadRelations($query)
+    {
+        $controller = Container::make(request()->route->getCallback()[0]);
+
+        // 当前列表结构
+        $schema = method_exists($controller, 'list') ? $controller->list() : '';
+
+        if (!$schema instanceof Page) return;
+
+        // 字段
+        $columns = $schema->toArray()['body']->amisSchema['columns'] ?? [];
+
+        $relations = [];
+        foreach ($columns as $column) {
+            // 排除非表格字段
+            if (!$column instanceof TableColumn) continue;
+            // 拆分字段名
+            $field = $column->amisSchema['name'];
+            // 是否是多层级
+            if (str_contains($field, '.')) {
+                // 去除字段名
+                $list = array_slice(explode('.', $field), 0, -1);
+                try {
+                    $_class = $this->modelName;
+                    foreach ($list as $item) {
+                        $_class = app($_class)->{$item}()->getModel()::class;
+                    }
+                } catch (\Throwable $e) {
+                    continue;
+                }
+                $relations[] = implode('.', $list);
+            }
+        }
+
+        // 加载关联关系
+        $query->with(array_unique($relations));
     }
 
     /**
@@ -102,7 +196,7 @@ abstract class AdminService
      *
      * @return void
      */
-    protected function sortable($query)
+    public function sortable($query)
     {
         if (request()->orderBy && request()->orderDir) {
             $query->orderBy(request()->orderBy, request()->orderDir ?? 'asc');
@@ -118,13 +212,13 @@ abstract class AdminService
      *
      * @return void
      */
-    protected function searchable($query)
+    public function searchable($query)
     {
         collect(array_keys(request()->query()))
             ->intersect($this->getTableColumns())
             ->map(function ($field) use ($query) {
-                $query->when(request()->input($field), function ($query) use ($field) {
-                    $query->where($field, 'like', '%' . request()->input($field) . '%');
+                $query->when(request($field), function ($query) use ($field) {
+                    $query->where($field, 'like', '%' . request($field) . '%');
                 });
             });
     }
@@ -138,11 +232,11 @@ abstract class AdminService
     {
         $updatedAtColumn = $this->getModel()->getUpdatedAtColumn();
 
-        if (Arr::has($this->getTableColumns(), $updatedAtColumn)) {
+        if (in_array($updatedAtColumn, $this->getTableColumns())) {
             return $updatedAtColumn;
         }
 
-        if (Arr::has($this->getTableColumns(), $this->getModel()->getKeyName())) {
+        if (in_array($this->getModel()->getKeyName(), $this->getTableColumns())) {
             return $this->getModel()->getKeyName();
         }
 
@@ -173,8 +267,10 @@ abstract class AdminService
      *
      * @return bool
      */
-    public function update($primaryKey, $data): bool
+    public function update($primaryKey, $data)
     {
+        $this->saving($data, $primaryKey);
+
         $columns = $this->getTableColumns();
         $model   = $this->query()->whereKey($primaryKey)->first();
 
@@ -186,7 +282,13 @@ abstract class AdminService
             $model->setAttribute($k, $v);
         }
 
-        return $model->save();
+        $result = $model->save();
+
+        if ($result) {
+            $this->saved($model, true);
+        }
+
+        return $result;
     }
 
     /**
@@ -196,8 +298,10 @@ abstract class AdminService
      *
      * @return bool
      */
-    public function store($data): bool
+    public function store($data)
     {
+        $this->saving($data);
+
         $columns = $this->getTableColumns();
         $model   = $this->getModel();
 
@@ -209,7 +313,13 @@ abstract class AdminService
             $model->setAttribute($k, $v);
         }
 
-        return $model->save();
+        $result = $model->save();
+
+        if ($result) {
+            $this->saved($model);
+        }
+
+        return $result;
     }
 
     /**
@@ -219,9 +329,15 @@ abstract class AdminService
      *
      * @return mixed
      */
-    public function delete(string $ids): mixed
+    public function delete(string $ids)
     {
-        return $this->query()->whereIn($this->primaryKey(), explode(',', $ids))->delete();
+        $result = $this->query()->whereIn($this->primaryKey(), explode(',', $ids))->delete();
+
+        if ($result) {
+            $this->deleted($ids);
+        }
+
+        return $result;
     }
 
     /**
@@ -252,5 +368,47 @@ abstract class AdminService
     public function quickEditItem($data)
     {
         return $this->update(Arr::pull($data, $this->primaryKey()), $data);
+    }
+
+    /**
+     * saving 钩子 (执行于新增/修改前)
+     *
+     * 可以通过判断 $primaryKey 是否存在来判断是新增还是修改
+     *
+     * @param $data
+     * @param $primaryKey
+     *
+     * @return void
+     */
+    public function saving(&$data, $primaryKey = '')
+    {
+
+    }
+
+    /**
+     * saved 钩子 (执行于新增/修改后)
+     *
+     * 可以通过 $isEdit 来判断是新增还是修改
+     *
+     * @param $model
+     * @param $isEdit
+     *
+     * @return void
+     */
+    public function saved($model, $isEdit = false)
+    {
+
+    }
+
+    /**
+     * deleted 钩子 (执行于删除后)
+     *
+     * @param $ids
+     *
+     * @return void
+     */
+    public function deleted($ids)
+    {
+
     }
 }

@@ -6,7 +6,7 @@ namespace plugin\jzadmin\renderer;
  * Column
  *
  * @author  slowlyo
- * @version v6.0.0
+ * @version 6.4.1
  */
 class Column extends BaseRenderer
 {
@@ -97,7 +97,7 @@ class Column extends BaseRenderer
     }
 
     /**
-     * 配置快速编辑功能
+     * 配置快速编辑功能 (配置快速编辑功能)
      */
     public function quickEdit($value = '')
     {

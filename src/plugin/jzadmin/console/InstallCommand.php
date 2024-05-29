@@ -31,7 +31,7 @@ class InstallCommand extends Command
 
     protected function setDirectory()
     {
-        $this->directory = config('admin.directory');
+        $this->directory = config('plugin.jzadmin.admin.directory');
     }
 
     protected function initAdminDirectory()
@@ -98,7 +98,7 @@ class InstallCommand extends Command
         $contents       = $this->getStub('HomeController');
         $this->laravel['files']->put(
             $homeController,
-            str_replace('{{Namespace}}', config('admin.route.namespace'), $contents)
+            str_replace('{{Namespace}}', config('plugin.jzadmin.admin.route.namespace'), $contents)
         );
         $this->line('<info>HomeController file was created:</info> ' . str_replace(base_path(), '', $homeController));
     }
@@ -109,7 +109,7 @@ class InstallCommand extends Command
         $contents          = $this->getStub('SettingController');
         $this->laravel['files']->put(
             $settingController,
-            str_replace('{{Namespace}}', config('admin.route.namespace'), $contents)
+            str_replace('{{Namespace}}', config('plugin.jzadmin.admin.route.namespace'), $contents)
         );
         $this->line('<info>SettingController file was created:</info> ' . str_replace(base_path(),
                 '',
@@ -118,7 +118,7 @@ class InstallCommand extends Command
 
     protected function getNamespace($name = null): string
     {
-        $base = str_replace('\\Controllers', '\\', config('admin.route.namespace'));
+        $base = str_replace('\\controller', '\\', config('plugin.jzadmin.admin.route.namespace'));
 
         return trim($base, '\\') . ($name ? "\\{$name}" : '');
     }

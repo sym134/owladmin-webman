@@ -6,7 +6,7 @@ namespace plugin\jzadmin\renderer;
  * Property 属性表
  *
  * @author  slowlyo
- * @version v6.0.0
+ * @version 6.4.1
  */
 class Property extends BaseRenderer
 {
@@ -56,7 +56,7 @@ class Property extends BaseRenderer
     }
 
     /**
-     * 显示模式，目前只有 'table' 和 'simple'
+     * 显示模式，目前只有 'table' 和 'simple' 可选值: table | simple
      */
     public function mode($value = '')
     {

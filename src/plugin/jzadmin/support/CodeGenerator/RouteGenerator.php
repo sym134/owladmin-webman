@@ -34,4 +34,9 @@ class RouteGenerator
         // 刷新路由
         runComman('admin:gen-route');
     }
+
+    public static function refresh()
+    {
+        runComman('admin:gen-route');
+    }
 }

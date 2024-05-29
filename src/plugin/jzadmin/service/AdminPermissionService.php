@@ -4,7 +4,6 @@ namespace plugin\jzadmin\service;
 
 use Illuminate\Support\Arr;
 use plugin\jzadmin\Admin;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use plugin\jzadmin\model\AdminPermission;
 
@@ -16,17 +15,19 @@ class AdminPermissionService extends AdminService
 {
     public function __construct()
     {
+        parent::__construct();
+
         $this->modelName = Admin::adminPermissionModel();
     }
 
-    public function getTree(): array
+    public function getTree()
     {
         $list = $this->query()->orderBy('order')->get()->toArray();
 
         return array2tree($list);
     }
 
-    public function parentIsChild($id, $parent_id): bool
+    public function parentIsChild($id, $parent_id)
     {
         $parent = $this->query()->find($parent_id);
 
@@ -41,7 +42,7 @@ class AdminPermissionService extends AdminService
         return false;
     }
 
-    public function getEditData($id): Model|\Illuminate\Database\Eloquent\Collection|Builder|array|null
+    public function getEditData($id)
     {
         $permission = parent::getEditData($id);
 
@@ -50,7 +51,7 @@ class AdminPermissionService extends AdminService
         return $permission;
     }
 
-    public function store($data): bool
+    public function store($data)
     {
         $this->checkRepeated($data);
 
@@ -61,7 +62,7 @@ class AdminPermissionService extends AdminService
         return $this->saveData($data, $columns, $model);
     }
 
-    public function update($primaryKey, $data): bool
+    public function update($primaryKey, $data)
     {
         $this->checkRepeated($data, $primaryKey);
 
@@ -69,7 +70,7 @@ class AdminPermissionService extends AdminService
 
         $parent_id = Arr::get($data, 'parent_id');
         if ($parent_id != 0) {
-            amis_abort_if($this->parentIsChild($primaryKey, $parent_id), __('admin.admin_permission.parent_id_not_allow'));
+            amis_abort_if($this->parentIsChild($primaryKey, $parent_id), admin_trans('admin.admin_permission.parent_id_not_allow'));
         }
 
         $model = $this->query()->whereKey($primaryKey)->first();
@@ -82,10 +83,10 @@ class AdminPermissionService extends AdminService
         $query = $this->query()->when($id, fn($query) => $query->where('id', '<>', $id));
 
         amis_abort_if($query->clone()->where('name', $data['name'])
-            ->exists(), __('admin.admin_permission.name_already_exists'));
+            ->exists(), admin_trans('admin.admin_permission.name_already_exists'));
 
         amis_abort_if($query->clone()->where('slug', $data['slug'])
-            ->exists(), __('admin.admin_permission.slug_already_exists'));
+            ->exists(), admin_trans('admin.admin_permission.slug_already_exists'));
     }
 
     public function list()
@@ -100,7 +101,7 @@ class AdminPermissionService extends AdminService
      *
      * @return bool
      */
-    protected function saveData($data, array $columns, AdminPermission $model): bool
+    protected function saveData($data, array $columns, AdminPermission $model)
     {
         $menus = Arr::pull($data, 'menus');
 

@@ -9,14 +9,18 @@ class AdminMenu extends BaseModel
 {
     protected $guarded = [];
 
-    const TYPE_ROUTE = 1;
-    const TYPE_LINK  = 2;
+    const TYPE_ROUTE  = 1;
+    const TYPE_LINK   = 2;
+    const TYPE_IFRAME = 3;
+    const TYPE_PAGE   = 4;
 
     public static function getType(): array
     {
         return [
-            self::TYPE_ROUTE => __('admin.admin_menu.route'),
-            self::TYPE_LINK  => __('admin.admin_menu.link'),
+            self::TYPE_ROUTE  => admin_trans('admin.admin_menu.route'),
+            self::TYPE_LINK   => admin_trans('admin.admin_menu.link'),
+            self::TYPE_IFRAME => admin_trans('admin.admin_menu.iframe'),
+            self::TYPE_PAGE   => admin_trans('admin.admin_menu.page'),
         ];
     }
 
@@ -32,8 +36,11 @@ class AdminMenu extends BaseModel
 
     public function title(): Attribute
     {
-        return Attribute::get(function ($value){
-            return __("menu.{$value}") == "menu.{$value}" ? $value : __("menu.{$value}");
+        return Attribute::get(function ($value) {
+            $transKey  = ($this->extension ? $this->extension . '::' : '') . "menu.{$value}";
+            $translate = admin_trans($transKey);
+
+            return $translate == $transKey ? $value : $translate;
         });
     }
 }

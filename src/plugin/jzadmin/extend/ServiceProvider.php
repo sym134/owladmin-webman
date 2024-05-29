@@ -58,7 +58,7 @@ abstract class ServiceProvider extends LaravelServiceProvider
      */
     public function boot()
     {
-        if (Schema::hasTable('admin_extensions')) {
+        if (Extension::tableExists()) {
             $this->autoRegister();
 
             $this->init();
@@ -163,7 +163,6 @@ abstract class ServiceProvider extends LaravelServiceProvider
     public function getAlias()
     {
         return $this->composerProperty?->alias;
-
     }
 
     /**
@@ -312,7 +311,7 @@ abstract class ServiceProvider extends LaravelServiceProvider
      * 获取或保存配置.
      *
      * @param string|null $key
-     * @param null $default
+     * @param null        $default
      *
      * @return mixed
      */
@@ -394,9 +393,9 @@ abstract class ServiceProvider extends LaravelServiceProvider
         }
 
         if ($down) {
-            appw('migrator')->rollback($path);
+            app('migrator')->rollback($path);
         } else {
-            appw('migrator')->run($path);
+            app('migrator')->run($path);
         }
     }
 
@@ -436,9 +435,9 @@ abstract class ServiceProvider extends LaravelServiceProvider
     {
         if (file_exists($this->getAssetPath())) {
             if (!file_exists($this->getPublishPath())) {
-                appw('files')->makeDirectory($this->getPublishPath(), 0755, true, true);
+                app('files')->makeDirectory($this->getPublishPath(), 0755, true, true);
             }
-            appw('files')->copyDirectory($this->getAssetPath(), $this->getPublishPath());
+            app('files')->copyDirectory($this->getAssetPath(), $this->getPublishPath());
         }
     }
 
@@ -449,7 +448,7 @@ abstract class ServiceProvider extends LaravelServiceProvider
      */
     public function unpublishable()
     {
-        appw('files')->deleteDirectory($this->getPublishPath());
+        app('files')->deleteDirectory($this->getPublishPath());
     }
 
     /**
@@ -567,8 +566,8 @@ abstract class ServiceProvider extends LaravelServiceProvider
      * 翻译.
      *
      * @param string $key
-     * @param array $replace
-     * @param null $locale
+     * @param array  $replace
+     * @param null   $locale
      *
      * @return array|string|null
      */
@@ -611,7 +610,7 @@ abstract class ServiceProvider extends LaravelServiceProvider
                     'extension' => $this->getName(),
                 ],
             ])
-            ->actions([amis('submit')->label(__('admin.save'))->level('primary')])
+            ->actions([amis('submit')->label(admin_trans('admin.save'))->level('primary')])
             ->api('post:' . admin_url('dev_tools/extensions/save_config'));
     }
 

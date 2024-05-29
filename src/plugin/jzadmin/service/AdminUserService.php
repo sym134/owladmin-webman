@@ -17,10 +17,12 @@ class AdminUserService extends AdminService
 {
     public function __construct()
     {
+        parent::__construct();
+
         $this->modelName = Admin::adminUserModel();
     }
 
-    public function getEditData($id): Model|\Illuminate\Database\Eloquent\Collection|Builder|array|null
+    public function getEditData($id)
     {
         $adminUser = parent::getEditData($id)->makeHidden('password');
 
@@ -29,11 +31,11 @@ class AdminUserService extends AdminService
         return $adminUser;
     }
 
-    public function store($data): bool
+    public function store($data)
     {
         $this->checkUsernameUnique($data['username']);
 
-        amis_abort_if(!data_get($data, 'password'), __('admin.required', ['attribute' => __('admin.password')]));
+        admin_abort_if(!data_get($data, 'password'), admin_trans('admin.required', ['attribute' => admin_trans('admin.password')]));
 
         $this->passwordHandler($data);
 
@@ -44,7 +46,7 @@ class AdminUserService extends AdminService
         return $this->saveData($data, $columns, $model);
     }
 
-    public function update($primaryKey, $data): bool
+    public function update($primaryKey, $data)
     {
         $this->checkUsernameUnique($data['username'], $primaryKey);
         $this->passwordHandler($data);
@@ -63,7 +65,7 @@ class AdminUserService extends AdminService
             ->when($id, fn($query) => $query->where('id', '<>', $id))
             ->exists();
 
-        amis_abort_if($exists, __('admin.admin_user.username_already_exists'));
+        admin_abort_if($exists, admin_trans('admin.admin_user.username_already_exists'));
     }
 
     public function updateUserSetting($primaryKey, $data): bool
@@ -78,17 +80,17 @@ class AdminUserService extends AdminService
         $password = Arr::get($data, 'password');
 
         if ($password) {
-            amis_abort_if($password !== Arr::get($data, 'confirm_password'), __('admin.admin_user.password_confirmation'));
+            admin_abort_if($password !== Arr::get($data, 'confirm_password'), admin_trans('admin.admin_user.password_confirmation'));
 
             if ($id) {
-                amis_abort_if(!Arr::get($data, 'old_password'), __('admin.admin_user.old_password_required'));
+                admin_abort_if(!Arr::get($data, 'old_password'), admin_trans('admin.admin_user.old_password_required'));
 
                 $oldPassword = $this->query()->where('id', $id)->value('password');
 
-                amis_abort_if(!Hash::check($data['old_password'], $oldPassword), __('admin.admin_user.old_password_error'));
+                admin_abort_if(!Hash::check($data['old_password'], $oldPassword), admin_trans('admin.admin_user.old_password_error'));
             }
 
-            $data['password'] = Hash::make($password);
+            $data['password'] = bcrypt($password);
 
             unset($data['confirm_password']);
             unset($data['old_password']);
@@ -101,7 +103,7 @@ class AdminUserService extends AdminService
 
         $query = $this->query()
             ->with('roles')
-            ->select(['id', 'name', 'username', 'avatar', 'created_at'])
+            ->select(['id', 'name', 'username', 'avatar', 'enabled', 'created_at'])
             ->when($keyword, function ($query) use ($keyword) {
                 $query->where('username', 'like', "%{$keyword}%")->orWhere('name', 'like', "%{$keyword}%");
             });
@@ -122,7 +124,7 @@ class AdminUserService extends AdminService
      *
      * @return bool
      */
-    protected function saveData($data, array $columns, AdminUser $model): bool
+    protected function saveData($data, array $columns, AdminUser $model)
     {
         $roles = Arr::pull($data, 'roles');
 
@@ -141,5 +143,17 @@ class AdminUserService extends AdminService
         }
 
         return false;
+    }
+
+    public function delete(string $ids)
+    {
+        $exists = $this->query()
+            ->whereIn($this->primaryKey(), explode(',', $ids))
+            ->whereHas('roles', fn($q) => $q->where('slug', 'administrator'))
+            ->exists();
+
+        admin_abort_if($exists, admin_trans('admin.admin_user.cannot_delete'));
+
+        return parent::delete($ids);
     }
 }

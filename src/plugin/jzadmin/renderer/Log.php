@@ -6,7 +6,7 @@ namespace plugin\jzadmin\renderer;
  * Log 实时日志
  *
  * @author  slowlyo
- * @version v6.0.0
+ * @version 6.4.1
  */
 class Log extends BaseRenderer
 {
@@ -64,7 +64,7 @@ class Log extends BaseRenderer
     }
 
     /**
-     * 可选日志操作：['stop', 'clear', 'showLineNumber', 'filter']
+     * 可选日志操作：['stop', 'clear', 'showLineNumber', 'filter'] 可选值: stop | clear | showLineNumber | filter
      */
     public function operation($value = '')
     {

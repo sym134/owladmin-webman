@@ -8,7 +8,7 @@ use plugin\jzadmin\renderer\Form;
 use plugin\jzadmin\extend\Extension;
 use plugin\jzadmin\renderer\DialogAction;
 use plugin\jzadmin\renderer\DrawerAction;
-use plugin\jzadmin\Events\ExtensionChanged;
+use plugin\jzadmin\event\ExtensionChanged;
 use plugin\jzadmin\controller\AdminController;
 
 class ExtensionController extends AdminController
@@ -74,8 +74,8 @@ class ExtensionController extends AdminController
                 $this->baseFilter()->body([
                     amis()->TextControl()
                         ->name('keywords')
-                        ->label(__('admin.extensions.form.name'))
-                        ->placeholder(__('admin.extensions.filter_placeholder'))
+                        ->label(admin_trans('admin.extensions.form.name'))
+                        ->placeholder(admin_trans('admin.extensions.filter_placeholder'))
                         ->size('md'),
                 ])
             )
@@ -87,7 +87,7 @@ class ExtensionController extends AdminController
                 amis('filter-toggler')->align('right'),
             ])
             ->columns([
-                amis()->TableColumn('alias', __('admin.extensions.form.name'))
+                amis()->TableColumn('alias', admin_trans('admin.extensions.form.name'))
                     ->type('tpl')
                     ->tpl('
 <div class="flex">
@@ -98,11 +98,11 @@ class ExtensionController extends AdminController
     </div>
 </div>
 '),
-                amis()->TableColumn('author', __('admin.extensions.card.author'))
+                amis()->TableColumn('author', admin_trans('admin.extensions.card.author'))
                     ->type('tpl')
                     ->tpl('<div>${authors[0].name}</div> <span class="text-gray-400">${authors[0].email}</span>'),
                 $this->rowActions([
-                    amis()->DrawerAction()->label(__('admin.show'))->className('p-0')->level('link')->drawer(
+                    amis()->DrawerAction()->label(admin_trans('admin.show'))->className('p-0')->level('link')->drawer(
                         amis()->Drawer()
                             ->size('lg')
                             ->title('README.md')
@@ -115,13 +115,13 @@ class ExtensionController extends AdminController
                             ]))
                     ),
                     amis()->DrawerAction()
-                        ->label(__('admin.extensions.setting'))
+                        ->label(admin_trans('admin.extensions.setting'))
                         ->level('link')
                         ->visibleOn('${has_setting && enabled}')
                         ->drawer(
                             amis()
                                 ->Drawer()
-                                ->title(__('admin.extensions.setting'))
+                                ->title(admin_trans('admin.extensions.setting'))
                                 ->resizable()
                                 ->closeOnOutside()
                                 ->body(
@@ -137,7 +137,7 @@ class ExtensionController extends AdminController
                                 ->actions([])
                         ),
                     amis()->AjaxAction()
-                        ->label('${enabled ? "' . __('admin.extensions.disable') . '" : "' . __('admin.extensions.enable') . '"}')
+                        ->label('${enabled ? "' . admin_trans('admin.extensions.disable') . '" : "' . admin_trans('admin.extensions.enable') . '"}')
                         ->level('link')
                         ->className(["text-success" => '${!enabled}', "text-danger" => '${enabled}'])
                         ->api([
@@ -148,9 +148,9 @@ class ExtensionController extends AdminController
                                 'enabled' => '${enabled}',
                             ],
                         ])
-                        ->confirmText('${enabled ? "' . __('admin.extensions.disable_confirm') . '" : "' . __('admin.extensions.enable_confirm') . '"}'),
+                        ->confirmText('${enabled ? "' . admin_trans('admin.extensions.disable_confirm') . '" : "' . admin_trans('admin.extensions.enable_confirm') . '"}'),
                     amis()->AjaxAction()
-                        ->label(__('admin.extensions.uninstall'))
+                        ->label(admin_trans('admin.extensions.uninstall'))
                         ->level('link')
                         ->className('text-danger')
                         ->api([
@@ -159,7 +159,7 @@ class ExtensionController extends AdminController
                             'data'   => ['id' => '${id}'],
                         ])
                         ->visibleOn('${used}')
-                        ->confirmText(__('admin.extensions.uninstall_confirm')),
+                        ->confirmText(admin_trans('admin.extensions.uninstall_confirm')),
                 ]),
             ]);
     }
@@ -172,24 +172,24 @@ class ExtensionController extends AdminController
     public function createExtend()
     {
         return amis()->DialogAction()
-            ->label(__('admin.extensions.create_extension'))
+            ->label(admin_trans('admin.extensions.create_extension'))
             ->icon('fa fa-add')
             ->level('success')
             ->dialog(
-                amis()->Dialog()->title(__('admin.extensions.create_extension'))->body(
+                amis()->Dialog()->title(admin_trans('admin.extensions.create_extension'))->body(
                     amis()->Form()->mode('normal')->api($this->getStorePath())->body([
                         amis()->Alert()
                             ->level('info')
                             ->showIcon()
-                            ->body(__('admin.extensions.create_tips', ['dir' => config('admin.extension.dir')])),
+                            ->body(admin_trans('admin.extensions.create_tips', ['dir' => config('plugin.jzadmin.admin.extension.dir')])),
                         amis()->TextControl()
                             ->name('name')
-                            ->label(__('admin.extensions.form.name'))
+                            ->label(admin_trans('admin.extensions.form.name'))
                             ->placeholder('eg: slowlyo/owl-admin')
                             ->required(),
                         amis()->TextControl()
                             ->name('namespace')
-                            ->label(__('admin.extensions.form.namespace'))
+                            ->label(admin_trans('admin.extensions.form.namespace'))
                             ->placeholder('eg: Slowlyo\Notice')
                             ->required(),
                     ])
@@ -211,7 +211,7 @@ class ExtensionController extends AdminController
         ExtensionChanged::dispatch($request->name, 'create');
 
         return $this->response()->successMessage(
-            __('admin.successfully_message', ['attribute' => __('admin.extensions.create')])
+            admin_trans('admin.successfully_message', ['attribute' => admin_trans('admin.extensions.create')])
         );
     }
 
@@ -223,10 +223,10 @@ class ExtensionController extends AdminController
     public function localInstall()
     {
         return amis()->DialogAction()
-            ->label(__('admin.extensions.local_install'))
+            ->label(admin_trans('admin.extensions.local_install'))
             ->icon('fa-solid fa-cloud-arrow-up')
             ->dialog(
-                amis()->Dialog()->title(__('admin.extensions.local_install'))->showErrorMsg(false)->body(
+                amis()->Dialog()->title(admin_trans('admin.extensions.local_install'))->showErrorMsg(false)->body(
                     amis()->Form()->mode('normal')->api('post:' . admin_url('dev_tools/extensions/install'))->body([
                         amis()->FileControl()->name('file')->label()->required()->drag()->accept('.zip'),
                     ])
@@ -264,11 +264,11 @@ class ExtensionController extends AdminController
     public function moreExtend()
     {
         return amis()->DrawerAction()
-            ->label(__('admin.extensions.more_extensions'))
+            ->label(admin_trans('admin.extensions.more_extensions'))
             ->icon('fa-regular fa-lightbulb')
             ->drawer(
                 amis()->Drawer()
-                    ->title(__('admin.extensions.more_extensions'))
+                    ->title(admin_trans('admin.extensions.more_extensions'))
                     ->size('xl')
                     ->closeOnEsc()
                     ->closeOnOutside()
@@ -337,7 +337,7 @@ class ExtensionController extends AdminController
         $file = $request->input('file');
 
         if (!$file) {
-            return $this->response()->fail(__('admin.extensions.validation.file'));
+            return $this->response()->fail(admin_trans('admin.extensions.validation.file'));
         }
 
         try {
@@ -348,14 +348,14 @@ class ExtensionController extends AdminController
             $extensionName = $manager->extract($path, true);
 
             if (!$extensionName) {
-                return $this->response()->fail(__('admin.extensions.validation.invalid_package'));
+                return $this->response()->fail(admin_trans('admin.extensions.validation.invalid_package'));
             }
 
             //安装扩展事件
             ExtensionChanged::dispatch($extensionName, 'install');
 
             return $this->response()->successMessage(
-                __('admin.successfully_message', ['attribute' => __('admin.extensions.install')])
+                admin_trans('admin.successfully_message', ['attribute' => admin_trans('admin.extensions.install')])
             );
         } catch (\Throwable $e) {
             return $this->response()->fail($e->getMessage());
@@ -398,7 +398,7 @@ class ExtensionController extends AdminController
         //扩展启用禁用事件
         ExtensionChanged::dispatch($request->id, $request->enabled ? 'enable' : 'disable');
 
-        return $this->response()->successMessage(__('admin.action_success'));
+        return $this->response()->successMessage(admin_trans('admin.action_success'));
     }
 
     /**
@@ -417,7 +417,7 @@ class ExtensionController extends AdminController
         //扩展卸载事件
         ExtensionChanged::dispatch($request->id, 'uninstall');
 
-        return $this->response()->successMessage(__('admin.action_success'));
+        return $this->response()->successMessage(admin_trans('admin.action_success'));
     }
 
     /**
@@ -435,7 +435,7 @@ class ExtensionController extends AdminController
 
         Admin::extension($request->input('extension'))->saveConfig($data);
 
-        return $this->response()->successMessage(__('admin.save_success'));
+        return $this->response()->successMessage(admin_trans('admin.save_success'));
     }
 
     /**

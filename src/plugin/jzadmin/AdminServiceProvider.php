@@ -7,22 +7,21 @@ use plugin\jzadmin\extend\Manager;
 use Illuminate\Support\ServiceProvider;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Container\ContainerExceptionInterface;
-use plugin\jzadmin\support\{Context, Cores\Menu, Cores\Asset, Cores\Module as AdminModule};
-use plugin\jzadmin\model\PersonalAccessToken;
-use Laravel\Sanctum\Sanctum;
+use plugin\jzadmin\support\{Context, Cores\Menu, Cores\Asset, Cores\Module};
 
 class AdminServiceProvider extends ServiceProvider
 {
     protected array $commands = [
+        Console\CheckCommand::class,
         Console\UpdateCommand::class,
         Console\InstallCommand::class,
         Console\PublishCommand::class,
         Console\GenRouteCommand::class,
+        Console\IdeHelperCommand::class,
         Console\CreateUserCommand::class,
-        Console\GenCodeClearCommand::class,
         Console\ResetPasswordCommand::class,
         Console\Module\InitCommand::class,
-        Console\Module\UpdateCommand::class,
+        Console\Module\InitDbCommand::class,
     ];
 
     protected array $routeMiddleware = [
@@ -57,7 +56,9 @@ class AdminServiceProvider extends ServiceProvider
         $this->registerConfig();
         $this->loadAdminAuthConfig();
         $this->registerServices();
-        $this->registerExtensions();
+
+        Admin::module()->register();
+        Admin::extension()->register();
         $this->registerRouteMiddleware();
         $this->loadViewsFrom(public_path('admin-assets'), 'admin');
     }
@@ -74,17 +75,13 @@ class AdminServiceProvider extends ServiceProvider
     {
         $this->ensureHttps();
         $this->registerPublishing();
-        $this->loadBaseRoute();
-        $this->bootExtensions();
+        Admin::loadBaseRoute();
+        Admin::extension()->boot();
         $this->loadRoutes();
         $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
         $this->loadTranslationsFrom(__DIR__ . '/../lang', 'admin');
-        $this->usePersonalAccessTokenModel();
-    }
 
-    protected function loadBaseRoute()
-    {
-        Admin::loadBaseRoute();
+        Admin::boot();
     }
 
     protected function loadRoutes()
@@ -97,7 +94,7 @@ class AdminServiceProvider extends ServiceProvider
             $this->loadRoutesFrom($routes);
         }
 
-        if ($modulePath = AdminModule::allRoutePath()) {
+        if ($modulePath = Admin::module()->allRoutePath()) {
             array_map(fn($path) => $this->loadRoutesFrom($path), $modulePath);
         }
     }
@@ -106,7 +103,7 @@ class AdminServiceProvider extends ServiceProvider
     {
         $this->mergeConfigFrom(__DIR__ . '/../config/admin.php', 'admin');
 
-        if ($moduleConfig = AdminModule::allConfigPath()) {
+        if ($moduleConfig = app(Module::class)->allConfigPath()) {
             foreach ($moduleConfig as $key => $path) {
                 $this->mergeConfigFrom($path, $key);
             }
@@ -140,32 +137,12 @@ class AdminServiceProvider extends ServiceProvider
 
     public function registerServices()
     {
+        $this->app->singleton('admin.module', Module::class);
         $this->app->singleton('admin.extend', Manager::class);
         $this->app->singleton('admin.context', Context::class);
         $this->app->singleton('admin.setting', fn() => settings());
         $this->app->singleton('admin.asset', Asset::class);
         $this->app->singleton('admin.menu', Menu::class);
-    }
-
-    /**
-     * @return void
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
-     * @throws \Exception
-     */
-    public function registerExtensions()
-    {
-        Admin::extension()->register();
-    }
-
-    /**
-     * @return void
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface|\ReflectionException
-     */
-    public function bootExtensions()
-    {
-        Admin::extension()->boot();
     }
 
     /**
@@ -182,13 +159,5 @@ class AdminServiceProvider extends ServiceProvider
         foreach ($this->middlewareGroups as $key => $middleware) {
             $router->middlewareGroup($key, $middleware);
         }
-    }
-
-    /**
-     * @return void
-     */
-    protected function usePersonalAccessTokenModel(): void
-    {
-        Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
     }
 }

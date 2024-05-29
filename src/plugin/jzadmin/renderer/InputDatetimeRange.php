@@ -6,7 +6,7 @@ namespace plugin\jzadmin\renderer;
  * InputDatetimeRange 日期时间范围
  *
  * @author  slowlyo
- * @version v6.0.0
+ * @version 6.4.1
  */
 class InputDatetimeRange extends BaseRenderer
 {

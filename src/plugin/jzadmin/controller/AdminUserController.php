@@ -23,22 +23,26 @@ class AdminUserController extends AdminController
                 ...$this->baseHeaderToolBar(),
             ])
             ->filter($this->baseFilter()->body(
-                amis()->TextControl('keyword', __('admin.keyword'))
+                amis()->TextControl('keyword', admin_trans('admin.keyword'))
                     ->size('md')
-                    ->placeholder(__('admin.admin_user.search_username'))
+                    ->placeholder(admin_trans('admin.admin_user.search_username'))
             ))
+            ->itemCheckableOn('${!administrator}')
             ->columns([
                 amis()->TableColumn('id', 'ID')->sortable(),
-                amis()->TableColumn('avatar', __('admin.admin_user.avatar'))->type('avatar')->src('${avatar}'),
-                amis()->TableColumn('username', __('admin.username')),
-                amis()->TableColumn('name', __('admin.admin_user.name')),
-                amis()->TableColumn('roles', __('admin.admin_user.roles'))->type('each')->items(
+                amis()->TableColumn('avatar', admin_trans('admin.admin_user.avatar'))->type('avatar')->src('${avatar}'),
+                amis()->TableColumn('username', admin_trans('admin.username')),
+                amis()->TableColumn('name', admin_trans('admin.admin_user.name')),
+                amis()->TableColumn('roles', admin_trans('admin.admin_user.roles'))->type('each')->items(
                     amis()->Tag()->label('${name}')->className('my-1')
                 ),
-                amis()->TableColumn('created_at', __('admin.created_at'))->type('datetime')->sortable(true),
-                Operation::make()->label(__('admin.actions'))->buttons([
+                amis()->TableColumn('enabled', admin_trans('admin.extensions.card.status'))->quickEdit(
+                    amis()->SwitchControl()->mode('inline')->disabledOn('${administrator}')->saveImmediately(true)
+                ),
+                amis()->TableColumn('created_at', admin_trans('admin.created_at'))->type('datetime')->sortable(true),
+                $this->rowActions([
                     $this->rowEditButton(true),
-                    $this->rowDeleteButton()->visibleOn('${id != 1}'),
+                    $this->rowDeleteButton()->hiddenOn('${administrator}'),
                 ]),
             ]);
 
@@ -48,12 +52,12 @@ class AdminUserController extends AdminController
     public function form(): Form
     {
         return $this->baseForm()->body([
-            amis()->ImageControl('avatar', __('admin.admin_user.avatar'))->receiver($this->uploadImagePath()),
-            amis()->TextControl('username', __('admin.username'))->required(),
-            amis()->TextControl('name', __('admin.admin_user.name'))->required(),
-            amis()->TextControl('password', __('admin.password'))->type('input-password'),
-            amis()->TextControl('confirm_password', __('admin.confirm_password'))->type('input-password'),
-            amis()->SelectControl('roles', __('admin.admin_user.roles'))
+            amis()->ImageControl('avatar', admin_trans('admin.admin_user.avatar'))->receiver($this->uploadImagePath()),
+            amis()->TextControl('username', admin_trans('admin.username'))->required(),
+            amis()->TextControl('name', admin_trans('admin.admin_user.name'))->required(),
+            amis()->TextControl('password', admin_trans('admin.password'))->type('input-password'),
+            amis()->TextControl('confirm_password', admin_trans('admin.confirm_password'))->type('input-password'),
+            amis()->SelectControl('roles', admin_trans('admin.admin_user.roles'))
                 ->searchable()
                 ->multiple()
                 ->labelField('name')
@@ -61,6 +65,11 @@ class AdminUserController extends AdminController
                 ->joinValues(false)
                 ->extractValue()
                 ->options(AdminRoleService::make()->query()->get(['id', 'name'])),
+            amis()->SwitchControl('enabled', admin_trans('admin.extensions.card.status'))
+                ->onText(admin_trans('admin.extensions.enable'))
+                ->offText(admin_trans('admin.extensions.disable'))
+                ->disabledOn('${id == 1}')
+                ->value(1),
         ]);
     }
 

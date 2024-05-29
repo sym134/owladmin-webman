@@ -6,7 +6,7 @@ namespace plugin\jzadmin\renderer;
  * Breadcrumb 面包屑 https://aisuda.bce.baidu.com/amis/zh-CN/components/breadcrumb
  *
  * @author  slowlyo
- * @version v6.0.0
+ * @version 6.4.1
  */
 class Breadcrumb extends BaseRenderer
 {

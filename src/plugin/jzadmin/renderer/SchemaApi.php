@@ -6,7 +6,7 @@ namespace plugin\jzadmin\renderer;
  * SchemaApi
  *
  * @author  slowlyo
- * @version v6.0.0
+ * @version 6.4.1
  */
 class SchemaApi extends BaseRenderer
 {
@@ -129,7 +129,7 @@ class SchemaApi extends BaseRenderer
     }
 
     /**
-     * 设置发送条件
+     * 设置发送条件 (表达式，语法 `data.xxx > 5`。)
      */
     public function sendOn($value = '')
     {
@@ -153,7 +153,7 @@ class SchemaApi extends BaseRenderer
     }
 
     /**
-     * API 发送目标地址
+     * API 发送目标地址 (API 发送目标地址)
      */
     public function url($value = '')
     {

@@ -5,9 +5,16 @@ namespace plugin\jzadmin\support\CodeGenerator;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use support\Db as DB;
+use plugin\jzadmin\trait\MakeTrait;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Artisan;
+use plugin\jzadmin\model\AdminCodeGenerator;
+use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
 class Generator
 {
+    use MakeTrait;
+
     public static array $dataTypeMap = [
         'int'                => 'integer',
         'int@unsigned'       => 'unsignedInteger',
@@ -36,32 +43,27 @@ class Generator
         'longtext'           => 'longText',
     ];
 
-    public static function make()
-    {
-        return new self();
-    }
-
     public function needCreateOptions()
     {
         return [
             [
-                'label' => __('admin.code_generators.create_database_migration'),
+                'label' => admin_trans('admin.code_generators.create_database_migration'),
                 'value' => 'need_database_migration',
             ],
             [
-                'label' => __('admin.code_generators.create_table'),
+                'label' => admin_trans('admin.code_generators.create_table'),
                 'value' => 'need_create_table',
             ],
             [
-                'label' => __('admin.code_generators.create_model'),
+                'label' => admin_trans('admin.code_generators.create_model'),
                 'value' => 'need_model',
             ],
             [
-                'label' => __('admin.code_generators.create_controller'),
+                'label' => admin_trans('admin.code_generators.create_controller'),
                 'value' => 'need_controller',
             ],
             [
-                'label' => __('admin.code_generators.create_service'),
+                'label' => admin_trans('admin.code_generators.create_service'),
                 'value' => 'need_service',
             ],
         ];
@@ -194,5 +196,149 @@ class Generator
         }
 
         return collect($data);
+    }
+
+    public function generate($id, $needs = [])
+    {
+        $record = AdminCodeGenerator::find($id);
+
+        $needs   = collect(filled($needs) ? $needs : $record->needs);
+        $columns = collect($record->columns);
+
+        $successMessage = fn($type, $path) => "<b class='text-success'>{$type} generated successfully!</b><br>{$path}<br><br>";
+
+        $paths   = [];
+        $message = '';
+        try {
+            // Model
+            if ($needs->contains('need_model')) {
+                $path = ModelGenerator::make()
+                    ->title($record->title)
+                    ->columns($columns)
+                    ->primary($record->primary_key)
+                    ->timestamps($record->need_timestamps)
+                    ->softDelete($record->soft_delete)
+                    ->generate($record->table_name, $record->model_name);
+
+                $message .= $successMessage('Model', $path);
+
+                $paths[] = $path;
+            }
+
+            // Controller
+            if ($needs->contains('need_controller')) {
+                $path = ControllerGenerator::make()
+                    ->title($record->title)
+                    ->primary($record->primary_key)
+                    ->title($record->title)
+                    ->tableName($record->table_name)
+                    ->pageInfo($record->page_info)
+                    ->serviceName($record->service_name)
+                    ->columns($columns)
+                    ->timestamps($record->need_timestamps)
+                    ->generate($record->controller_name);
+
+                $message .= $successMessage('Controller', $path);
+
+                $paths[] = $path;
+            }
+
+            // Service
+            if ($needs->contains('need_service')) {
+                $path = ServiceGenerator::make()
+                    ->title($record->title)
+                    ->generate($record->service_name, $record->model_name);
+
+                $message .= $successMessage('Service', $path);
+
+                $paths[] = $path;
+            }
+
+            // Route
+            RouteGenerator::handle($record->menu_info);
+
+            // Migration
+            $migratePath = '';
+            if ($needs->contains('need_database_migration')) {
+                $path = MigrationGenerator::make()
+                    ->title($record->title)
+                    ->primary($record->primary_key)
+                    ->timestamps($record->need_timestamps)
+                    ->softDelete($record->soft_delete)
+                    ->generate($record->table_name, $columns, $record->model_name);
+
+                $message     .= $successMessage('Migration', $path);
+                $migratePath = str_replace(base_path(), '', $path);
+                $paths[]     = $path;
+            }
+
+            // 创建数据库表
+            if ($needs->contains('need_create_table')) {
+                if (Schema::hasTable($record->table_name)) {
+                    abort(HttpResponse::HTTP_BAD_REQUEST, "Table [{$record->table_name}] already exists!");
+                }
+
+                if ($migratePath) {
+                    Artisan::call('migrate', ['--path' => $migratePath]);
+                } else {
+                    Artisan::call('migrate');
+                }
+                $message .= $successMessage('Table', Artisan::output());
+            }
+        } catch (\Throwable $e) {
+            app('files')->delete($paths);
+
+            RouteGenerator::refresh();
+
+            admin_abort($e->getMessage());
+        }
+
+        return $message;
+    }
+
+    public function preview($id)
+    {
+        $record  = AdminCodeGenerator::find($id);
+        $columns = collect($record->columns);
+
+        try {
+            // Model
+            $model = ModelGenerator::make()
+                ->title($record->title)
+                ->columns($columns)
+                ->primary($record->primary_key)
+                ->timestamps($record->need_timestamps)
+                ->softDelete($record->soft_delete)
+                ->preview($record->table_name, $record->model_name);
+
+            // Migration
+            $migration = MigrationGenerator::make()
+                ->title($record->title)
+                ->primary($record->primary_key)
+                ->timestamps($record->need_timestamps)
+                ->softDelete($record->soft_delete)
+                ->setColumns($columns)
+                ->preview($record->table_name);
+
+            // Controller
+            $controller = ControllerGenerator::make()
+                ->primary($record->primary_key)
+                ->title($record->title)
+                ->tableName($record->table_name)
+                ->pageInfo($record->page_info)
+                ->serviceName($record->service_name)
+                ->columns($columns)
+                ->timestamps($record->need_timestamps)
+                ->preview($record->controller_name);
+
+            // Service
+            $service = ServiceGenerator::make()
+                ->title($record->title)
+                ->preview($record->service_name, $record->model_name);
+        } catch (\Exception $e) {
+            admin_abort($e->getMessage());
+        }
+
+        return compact('controller', 'service', 'model', 'migration');
     }
 }

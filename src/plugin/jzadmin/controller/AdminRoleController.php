@@ -22,29 +22,30 @@ class AdminRoleController extends AdminController
                 ...$this->baseHeaderToolBar(),
             ])
             ->filterTogglable(false)
+            ->itemCheckableOn('${slug !== "administrator"}')
             ->columns([
                 amis()->TableColumn()->label('ID')->name('id')->sortable(),
-                amis()->TableColumn()->label(__('admin.admin_role.name'))->name('name'),
-                amis()->TableColumn()->label(__('admin.admin_role.slug'))->name('slug')->type('tag'),
+                amis()->TableColumn()->label(admin_trans('admin.admin_role.name'))->name('name'),
+                amis()->TableColumn()->label(admin_trans('admin.admin_role.slug'))->name('slug')->type('tag'),
                 amis()->TableColumn()
-                    ->label(__('admin.created_at'))
+                    ->label(admin_trans('admin.created_at'))
                     ->name('created_at')
                     ->type('datetime')
                     ->sortable(true),
                 amis()->TableColumn()
-                    ->label(__('admin.updated_at'))
+                    ->label(admin_trans('admin.updated_at'))
                     ->name('updated_at')
                     ->type('datetime')
                     ->sortable(true),
-                amis()->Operation()->label(__('admin.actions'))->buttons([
+                $this->rowActions([
                     $this->setPermission(),
                     $this->rowEditButton(true),
-                    $this->rowDeleteButton()->visibleOn('${slug != "administrator"}'),
+                    $this->rowDeleteButton()->hiddenOn('${slug == "administrator"}'),
                 ]),
             ]);
 
         return $this->baseList($crud)->css([
-            '.tree-full'                               => [
+            '.tree-full'                   => [
                 'overflow' => 'hidden !important',
             ],
             '.cxd-TreeControl > .cxd-Tree' => [
@@ -56,49 +57,58 @@ class AdminRoleController extends AdminController
 
     protected function setPermission()
     {
-        return amis()->DrawerAction()->label(__('admin.admin_role.set_permissions'))->icon('fa-solid fa-gear')->level('link')->drawer(
-            amis()->Drawer()->title(__('admin.admin_role.set_permissions'))->resizable()->closeOnOutside()->closeOnEsc()->body([
-                amis()
-                    ->Form()
-                    ->api(admin_url('system/admin_role_save_permissions'))
-                    ->initApi($this->getEditGetDataPath())
-                    ->mode('normal')
-                    ->data(['id' => '${id}'])
+        return amis()->DrawerAction()
+            ->label(admin_trans('admin.admin_role.set_permissions'))
+            ->icon('fa-solid fa-gear')
+            ->level('link')
+            ->drawer(
+                amis()->Drawer()
+                    ->title(admin_trans('admin.admin_role.set_permissions'))
+                    ->resizable()
+                    ->closeOnOutside()
+                    ->closeOnEsc()
                     ->body([
-                        amis()->TreeControl()
-                            ->name('permissions')
-                            ->label()
-                            ->multiple()
-                            ->options(AdminPermissionService::make()->getTree())
-                            ->searchable()
-                            ->cascade()
-                            ->joinValues(false)
-                            ->extractValue()
-                            ->size('full')
-                            ->className('h-full b-none')
-                            ->inputClassName('h-full tree-full')
-                            ->labelField('name')
-                            ->valueField('id'),
-                    ]),
-            ])
-        );
+                        amis()->Form()
+                            ->api(admin_url('system/admin_role_save_permissions'))
+                            ->initApi($this->getEditGetDataPath())
+                            ->mode('normal')
+                            ->data(['id' => '${id}'])
+                            ->body([
+                                amis()->TreeControl()
+                                    ->name('permissions')
+                                    ->label()
+                                    ->multiple()
+                                    ->heightAuto()
+                                    ->options(AdminPermissionService::make()->getTree())
+                                    ->searchable()
+                                    ->cascade()
+                                    ->joinValues(false)
+                                    ->extractValue()
+                                    ->size('full')
+                                    ->className('h-full b-none')
+                                    ->inputClassName('h-full tree-full')
+                                    ->labelField('name')
+                                    ->valueField('id'),
+                            ]),
+                    ])
+            );
     }
 
     public function savePermissions()
     {
         $result = $this->service->savePermissions(request('id'), request('permissions'));
 
-        return $this->autoResponse($result, __('admin.save'));
+        return $this->autoResponse($result, admin_trans('admin.save'));
     }
 
     public function form(): Form
     {
         return $this->baseForm()->body([
-            amis()->TextControl()->label(__('admin.admin_role.name'))->name('name')->required(),
+            amis()->TextControl()->label(admin_trans('admin.admin_role.name'))->name('name')->required(),
             amis()->TextControl()
-                ->label(__('admin.admin_role.slug'))
+                ->label(admin_trans('admin.admin_role.slug'))
                 ->name('slug')
-                ->description(__('admin.admin_role.slug_description'))
+                ->description(admin_trans('admin.admin_role.slug_description'))
                 ->required(),
         ]);
     }

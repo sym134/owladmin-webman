@@ -2,6 +2,7 @@
 
 namespace plugin\jzadmin\support\CodeGenerator;
 
+use plugin\jzadmin\Admin;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
@@ -23,16 +24,20 @@ class MigrationGenerator extends BaseMigrationCreator
 
     public static function make(): static
     {
-        return new static(appw('files'), __DIR__ . '/stubs');
+        return new static(app('files'), __DIR__ . '/stubs');
     }
 
-    public function generate($table, $columns): string
+    public function generate($table, $columns, $model_name): string
     {
         $this->columns = $columns;
-
-        $name = 'create_' . $table . '_table';
-
-        return $this->create($name, database_path('migrations'), $table, null);
+        $name          = 'create_' . $table . '_table';
+        $path          = BaseGenerator::guessClassFileName($model_name);
+        if (Admin::currentModule()) {
+            $path = str_replace('/Models/', '/database/migrations/', $path);
+        } else {
+            $path = database_path('migrations') . '/temp.php';
+        }
+        return $this->create($name, dirname($path), $table, null);
     }
 
     protected function populateStub($stub, $table): array|string
@@ -68,7 +73,7 @@ class MigrationGenerator extends BaseMigrationCreator
 
     public function generateContent(): string
     {
-        empty($this->columns) && abort(400, 'Table fields can\'t be empty');
+        empty($this->columns) && abort(400, 'Table fields can\'t be empty'); // webman
 
         $rows   = [];
         $rows[] = "\$table->comment('{$this->title}');\n";
@@ -143,10 +148,7 @@ class MigrationGenerator extends BaseMigrationCreator
             ? $customPath
             : $this->stubPath() . '/migration.stub';
 
-        $content =$this->files->get($stub);
-        $content=str_replace('use Illuminate\Database\Migrations\Migration;','use Jizhi\JzAdmin\Migrations\Migration;',$content);
-        $content=str_replace('Schema::','$this->schema()->',$content);
-        return $content;
+        return $this->files->get($stub);
     }
 
     public function stubPath(): string

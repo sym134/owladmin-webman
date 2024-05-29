@@ -8,7 +8,7 @@ use plugin\jzadmin\renderer\Tabs;
 use plugin\jzadmin\renderer\Alert;
 use plugin\jzadmin\renderer\InputKV;
 use plugin\jzadmin\renderer\TextControl;
-use Slowlyo\OwlAdmin\Controllers\AdminController;
+use plugin\jzadmin\controller\AdminController;
 
 class SettingController extends AdminController
 {

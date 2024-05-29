@@ -48,7 +48,7 @@ class Manager
 
         $this->extensions = new Collection();
 
-        $this->files = appw('files');
+        $this->files = app('files');
     }
 
     /**
@@ -130,7 +130,6 @@ class Manager
             try {
                 $this->loadExtension($directory);
             } catch (\Throwable $e) {
-                $this->reportException($e);
             }
         }
 
@@ -470,8 +469,6 @@ class Manager
                 $this->settings = ExtensionModel::all()->keyBy('name');
             } catch (\Throwable $e) {
                 $this->settings = new Collection();
-
-                $this->reportException($e);
             }
         }
 
@@ -535,18 +532,6 @@ class Manager
                 require_once $_path;
             }
         }
-    }
-
-    /**
-     * 上报异常.
-     *
-     * @param \Throwable $e
-     *
-     * @throws \Exception
-     */
-    protected function reportException(\Throwable $e)
-    {
-        throw new \Exception($e);
     }
 
     /**

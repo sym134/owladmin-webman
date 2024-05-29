@@ -50,8 +50,21 @@ class Permission
             ->merge($this->authExcept)
             ->map(fn($path) => $this->pathFormatting($path))
             ->contains(fn($except) => $request->is($except == '/' ? $except : trim($except, '/')));
+        return !$excepted && empty(Admin::guard()->user());
+    }
 
-        return !$excepted && is_null(Admin::guard()->user());
+    /**
+     * 检查用户状态
+     *
+     * @return void
+     */
+    public function checkUserStatus()
+    {
+        $user = Admin::user();
+
+        if ($user && !$user->enabled) {
+            Admin::user()->currentAccessToken()->delete();
+        }
     }
 
     /**
@@ -95,7 +108,7 @@ class Permission
     {
         $middlewarePrefix = 'admin.permission:';
 
-        $middleware = collect($request->route
+        $middleware = collect($request->route // webman $request->route
             ?->middleware())->first(fn($middleware) => Str::startsWith($middleware, $middlewarePrefix));
 
         if (!$middleware) {

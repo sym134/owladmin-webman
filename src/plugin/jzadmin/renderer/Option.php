@@ -6,7 +6,7 @@ namespace plugin\jzadmin\renderer;
  * Option
  *
  * @author  slowlyo
- * @version v6.0.0
+ * @version 6.4.1
  */
 class Option extends BaseRenderer
 {
@@ -17,7 +17,7 @@ class Option extends BaseRenderer
     }
 
     /**
-     * 支持嵌套
+     * 支持嵌套 (支持嵌套)
      */
     public function children($value = '')
     {

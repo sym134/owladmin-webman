@@ -6,7 +6,7 @@ namespace plugin\jzadmin\renderer;
  * Options 选择器表单项
  *
  * @author  slowlyo
- * @version v6.0.0
+ * @version 6.4.1
  */
 class Options extends BaseRenderer
 {

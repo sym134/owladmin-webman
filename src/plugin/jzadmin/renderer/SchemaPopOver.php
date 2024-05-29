@@ -6,7 +6,7 @@ namespace plugin\jzadmin\renderer;
  * SchemaPopOver
  *
  * @author  slowlyo
- * @version v6.0.0
+ * @version 6.4.1
  */
 class SchemaPopOver extends BaseRenderer
 {
@@ -57,7 +57,7 @@ class SchemaPopOver extends BaseRenderer
     }
 
     /**
-     * 配置当前行是否启动，要用表达式
+     * 配置当前行是否启动，要用表达式 (表达式，语法 `data.xxx > 5`。)
      */
     public function popOverEnableOn($value = '')
     {

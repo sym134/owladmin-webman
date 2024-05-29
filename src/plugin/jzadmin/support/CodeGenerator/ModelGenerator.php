@@ -44,14 +44,14 @@ class ModelGenerator extends BaseGenerator
         $path = static::guessClassFileName($name);
         $dir  = dirname($path);
 
-        $files = appw('files');
+        $files = app('files');
 
         if (!is_dir($dir)) {
             $files->makeDirectory($dir, 0755, true);
         }
 
         if ($files->exists($path)) {
-            abort(400, "Model [$name] already exists!");
+            abort(400, "Model [$name] already exists!"); // webman
         }
 
         $stub = $files->get($this->stub);
@@ -75,7 +75,7 @@ class ModelGenerator extends BaseGenerator
     public function preview($table, $name)
     {
         $name  = str_replace('/', '\\', $name);
-        $files = appw('files');
+        $files = app('files');
         $stub  = $files->get($this->stub);
 
         return $this->replaceClass($stub, $name)
@@ -129,12 +129,17 @@ class ModelGenerator extends BaseGenerator
 
         $this->columns->each(function ($column) use (&$content) {
             if (Arr::get($column, 'file_column', false)) {
+                $_name   = Str::camel($column['name']);
+                $fun = 'file_upload_handle';
+                if(Arr::get($column, 'file_column_multi', false)){
+                    $fun = 'file_upload_handle_multi';
+                }
                 $content .= <<<EOF
 
 
-    public function {$column['name']}():\Illuminate\Database\Eloquent\Casts\Attribute
+    public function {$_name}():\Illuminate\Database\Eloquent\Casts\Attribute
     {
-        return file_upload_handle();
+        return {$fun}();
     }
 EOF;
 

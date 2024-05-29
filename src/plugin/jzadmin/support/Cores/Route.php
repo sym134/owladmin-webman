@@ -2,44 +2,39 @@
 
 namespace plugin\jzadmin\support\Cores;
 
+use plugin\jzadmin\Admin;
 use Illuminate\Routing\Router;
 use plugin\jzadmin\controller\{
-    AuthController,
     HomeController,
     IndexController,
     AdminUserController,
     AdminMenuController,
     AdminRoleController,
+    DevTools\ApiController,
+    DevTools\PagesController,
     AdminPermissionController,
     DevTools\EditorController,
     DevTools\ExtensionController,
-    DevTools\CodeGeneratorController,
+    DevTools\RelationshipController,
+    DevTools\CodeGeneratorController
 };
 
 class Route
 {
     public static function baseLoad()
     {
-        $modules = config('admin.modules');
+        $modules = Admin::module()->allModules(true);
 
         array_unshift($modules, '');
 
-        array_map(fn($item) => self::baseRoutes(strtolower($item ? "{$item}." : $item)), $modules);
+        array_map(fn($item) => self::baseRoutes($item ? Admin::module()->getLowerName($item) . '.' : $item), $modules);
     }
 
     private static function baseRoutes($prefix)
     {
         $config = fn($key) => config($prefix . $key);
 
-        appw('router')->get('/admin', function (){
-            $view = app(\Illuminate\View\Factory::class);
-
-            $view->addExtension('html', 'file');
-
-            return $view->make('admin::index');
-        });
-
-        appw('router')->group([
+        app('router')->group([
             'domain'     => $config('admin.route.domain'),
             'prefix'     => $config('admin.route.prefix'),
             'middleware' => $config('admin.route.middleware'),
@@ -56,6 +51,8 @@ class Route
             $router->post('_settings', [IndexController::class, 'saveSettings']);
             $router->get('no-content', [IndexController::class, 'noContentResponse']);
             $router->get('_download_export', [IndexController::class, 'downloadExport']);
+            $router->get('_iconify_search', [IndexController::class, 'iconifySearch']);
+            $router->get('page_schema', [IndexController::class, 'pageSchema']);
 
             $router->any('upload_file', [IndexController::class, 'uploadFile']);
             $router->any('upload_rich', [IndexController::class, 'uploadRich']);
@@ -69,6 +66,7 @@ class Route
                 $router->get('/', [AdminUserController::class, 'index']);
 
                 $router->resource('admin_users', AdminUserController::class);
+                $router->post('admin_menus/save_order', [AdminMenuController::class, 'saveOrder']);
                 $router->resource('admin_menus', AdminMenuController::class);
                 $router->resource('admin_roles', AdminRoleController::class);
                 $router->resource('admin_permissions', AdminPermissionController::class);
@@ -83,6 +81,9 @@ class Route
                     $router->group(['prefix' => 'code_generator'], function (Router $router) {
                         $router->post('preview', [CodeGeneratorController::class, 'preview']);
                         $router->post('generate', [CodeGeneratorController::class, 'generate']);
+                        $router->post('clear', [CodeGeneratorController::class, 'clear']);
+                        $router->post('gen_record_options', [CodeGeneratorController::class, 'genRecordOptions']);
+                        $router->post('form_data', [CodeGeneratorController::class, 'formData']);
                         $router->post('get_record', [CodeGeneratorController::class, 'getRecord']);
                         $router->post('get_property_options', [CodeGeneratorController::class, 'getPropertyOptions']);
 
@@ -91,11 +92,16 @@ class Route
                             $router->post('/list', [CodeGeneratorController::class, 'getComponentProperty']);
                             $router->post('/del', [CodeGeneratorController::class, 'delComponentProperty']);
                         });
+
+                        $router->group(['prefix' => 'common_field'], function (Router $router){
+                            $router->post('/', [CodeGeneratorController::class, 'saveColumnProperty']);
+                            $router->post('/list', [CodeGeneratorController::class, 'getColumnProperty']);
+                            $router->post('/del', [CodeGeneratorController::class, 'delColumnProperty']);
+                        });
                     });
 
                     $router->resource('extensions', ExtensionController::class);
                     $router->group(['prefix' => 'extensions'], function (Router $router) {
-                        $router->post('more', [ExtensionController::class, 'more']);
                         $router->post('enable', [ExtensionController::class, 'enable']);
                         $router->post('install', [ExtensionController::class, 'install']);
                         $router->post('uninstall', [ExtensionController::class, 'uninstall']);
@@ -105,8 +111,57 @@ class Route
                     });
 
                     $router->post('editor_parse', [EditorController::class, 'index']);
+
+                    $router->resource('pages', PagesController::class);
+
+                    $router->resource('relationships', RelationshipController::class);
+                    $router->group(['prefix' => 'relation'], function (Router $router) {
+                        $router->get('model_options', [RelationshipController::class, 'modelOptions']);
+                        $router->get('column_options', [RelationshipController::class, 'columnOptions']);
+                        $router->get('all_models', [RelationshipController::class, 'allModels']);
+                        $router->post('generate_model', [RelationshipController::class, 'generateModel']);
+                    });
+
+                    $router->resource('apis', ApiController::class);
+                    $router->group(['prefix' => 'api'], function (Router $router) {
+                        $router->get('templates', [ApiController::class, 'template']);
+                        $router->get('args_schema', [ApiController::class, 'argsSchema']);
+                        $router->post('add_template', [ApiController::class, 'addTemplate']);
+                    });
                 });
             }
         });
+    }
+
+    public static function mixMiddlewareGroup(array $mix = [])
+    {
+        $router = app('router');
+        $group  = $router->getMiddlewareGroups()['admin'] ?? [];
+
+        if ($mix) {
+            $finalGroup = [];
+
+            foreach ($group as $i => $mid) {
+                $next = $i + 1;
+
+                $finalGroup[] = $mid;
+
+                if (!isset($group[$next]) || $group[$next] !== 'admin.permission') {
+                    continue;
+                }
+
+                $finalGroup = array_merge($finalGroup, $mix);
+
+                $mix = [];
+            }
+
+            if ($mix) {
+                $finalGroup = array_merge($finalGroup, $mix);
+            }
+
+            $group = $finalGroup;
+        }
+
+        $router->middlewareGroup('admin', $group);
     }
 }
