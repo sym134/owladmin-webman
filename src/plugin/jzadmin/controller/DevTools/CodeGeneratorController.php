@@ -170,8 +170,8 @@ class CodeGeneratorController extends AdminController
                                                         'args'        => [
                                                             'value' => [
                                                                 'model_name'      => '${model_path}${' . $nameHandler . '}',
-                                                                'controller_name' => '${controller_path}${' . $nameHandler . '}Controller',
-                                                                'service_name'    => '${service_path}${' . $nameHandler . '}Service',
+                                                                'controller_name' => '${controller_path}${' . $nameHandler . '}controller',
+                                                                'service_name'    => '${service_path}${' . $nameHandler . '}service',
                                                             ],
                                                         ],
                                                     ],
@@ -231,32 +231,32 @@ class CodeGeneratorController extends AdminController
                                     ->value('id')
                                     ->description(admin_trans('admin.code_generators.primary_key_description'))
                                     ->required(),
-                                amis()
-                                    ->SelectControl('save_path', admin_trans('admin.code_generators.save_path_select'))
-                                    ->searchable()
-                                    ->description(admin_trans('admin.code_generators.save_path_select_tips'))
-                                    ->clearable()
-                                    ->value('${default_path}')
-                                    ->selectMode('group')
-                                    ->source('${save_path_options}')
-                                    ->onEvent([
-                                        'change' => [
-                                            'actions' => [
-                                                // 更新 table_name 的值
-                                                [
-                                                    'actionType'  => 'setValue',
-                                                    'componentId' => 'code_generator_form',
-                                                    'args'        => [
-                                                        'value' => [
-                                                            'controller_path' => '${event.data.value.controller_path}',
-                                                            'service_path'    => '${event.data.value.service_path}',
-                                                            'model_path'      => '${event.data.value.model_path}',
-                                                        ],
-                                                    ],
-                                                ],
-                                            ],
-                                        ],
-                                    ]),
+                                // amis()
+                                //     ->SelectControl('save_path', admin_trans('admin.code_generators.save_path_select'))
+                                //     ->searchable()
+                                //     ->description(admin_trans('admin.code_generators.save_path_select_tips'))
+                                //     ->clearable()
+                                //     ->value('${default_path}')
+                                //     ->selectMode('group')
+                                //     ->source('${save_path_options}')
+                                //     ->onEvent([
+                                //         'change' => [
+                                //             'actions' => [
+                                //                 // 更新 table_name 的值
+                                //                 [
+                                //                     'actionType'  => 'setValue',
+                                //                     'componentId' => 'code_generator_form',
+                                //                     'args'        => [
+                                //                         'value' => [
+                                //                             'controller_path' => '${event.data.value.controller_path}',
+                                //                             'service_path'    => '${event.data.value.service_path}',
+                                //                             'model_path'      => '${event.data.value.model_path}',
+                                //                         ],
+                                //                     ],
+                                //                 ],
+                                //             ],
+                                //         ],
+                                //     ]),
                                 amis()->TextControl('model_name', admin_trans('admin.code_generators.model_name')),
                                 amis()->TextControl('controller_name', admin_trans('admin.code_generators.controller_name')),
                                 amis()->TextControl('service_name', admin_trans('admin.code_generators.service_name')),
@@ -323,7 +323,7 @@ class CodeGeneratorController extends AdminController
      *
      * @param Request $request
      *
-     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\Resources\Json\JsonResource
+     * @return Response
      */
     public function generate(Request $request)
     {
@@ -337,9 +337,9 @@ class CodeGeneratorController extends AdminController
      *
      * @param Request $request
      *
-     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\Resources\Json\JsonResource
+     * @return Response
      */
-    public function preview(Request $request)
+    public function preview(Request $request): Response
     {
         $data = Generator::make()->preview($request->id);
 
@@ -351,7 +351,7 @@ class CodeGeneratorController extends AdminController
      *
      * @param Request $request
      *
-     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\Resources\Json\JsonResource
+     * @return Response
      * @throws \ReflectionException
      */
     public function getPropertyOptions(Request $request)
@@ -389,7 +389,7 @@ class CodeGeneratorController extends AdminController
      *
      * @param Request $request
      *
-     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\Resources\Json\JsonResource
+     * @return Response
      */
     public function saveComponentProperty(Request $request)
     {
@@ -415,7 +415,7 @@ class CodeGeneratorController extends AdminController
      *
      * @param Request $request
      *
-     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\Resources\Json\JsonResource
+     * @return Response
      */
     public function getComponentProperty(Request $request)
     {
@@ -429,7 +429,7 @@ class CodeGeneratorController extends AdminController
      *
      * @param Request $request
      *
-     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\Resources\Json\JsonResource
+     * @return Response
      */
     public function delComponentProperty(Request $request)
     {
@@ -455,7 +455,7 @@ class CodeGeneratorController extends AdminController
      *
      * @param Request $request
      *
-     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\Resources\Json\JsonResource
+     * @return Response
      */
     public function saveColumnProperty(Request $request)
     {
@@ -474,7 +474,7 @@ class CodeGeneratorController extends AdminController
      *
      * @param Request $request
      *
-     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\Resources\Json\JsonResource
+     * @return Response
      */
     public function getColumnProperty(Request $request)
     {
@@ -492,7 +492,7 @@ class CodeGeneratorController extends AdminController
      *
      * @param Request $request
      *
-     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\Resources\Json\JsonResource
+     * @return Response
      */
     public function delColumnProperty(Request $request)
     {
@@ -516,7 +516,7 @@ class CodeGeneratorController extends AdminController
     /**
      * 获取记录
      *
-     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\Resources\Json\JsonResource
+     * @return Response
      */
     public function getRecord()
     {
@@ -532,6 +532,7 @@ class CodeGeneratorController extends AdminController
         $defaultPath = $this->service->getDefaultPath();
 
         $savePaths = [$defaultPath];
+        // webman owl 插件获取
         // foreach (Admin::extension()->all() as $extension) {
         //     $property    = $extension->composerProperty;
         //     $namespace   = str_replace('\\', "/", array_key_first($property->get('autoload.psr-4')));
@@ -1059,7 +1060,7 @@ class CodeGeneratorController extends AdminController
     /**
      * 清除代码
      *
-     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\Resources\Json\JsonResource
+     * @return Response
      */
     public function clear()
     {

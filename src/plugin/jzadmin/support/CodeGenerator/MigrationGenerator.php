@@ -31,12 +31,12 @@ class MigrationGenerator extends BaseMigrationCreator
     {
         $this->columns = $columns;
         $name          = 'create_' . $table . '_table';
-        $path          = BaseGenerator::guessClassFileName($model_name);
-        if (Admin::currentModule()) {
-            $path = str_replace('/Models/', '/database/migrations/', $path);
-        } else {
+        // $path          = BaseGenerator::guessClassFileName($model_name); // webman owl组件
+        // if (Admin::currentModule()) { // 组件
+        //     $path = str_replace('/Models/', '/database/migrations/', $path);
+        // } else {
             $path = database_path('migrations') . '/temp.php';
-        }
+        // }
         return $this->create($name, dirname($path), $table, null);
     }
 

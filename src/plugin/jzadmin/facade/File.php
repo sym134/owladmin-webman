@@ -58,7 +58,7 @@ class File
 {
     public static function instance(): Filesystem
     {
-        return Container::make(Filesystem::class);
+        return Container::make(Filesystem::class,[]);
     }
 
     public static function __callStatic($name, $arguments)

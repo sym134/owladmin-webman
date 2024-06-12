@@ -5,9 +5,18 @@ namespace plugin\jzadmin\support\CodeGenerator;
 use Illuminate\Support\Facades\Artisan;
 use plugin\jzadmin\service\AdminMenuService;
 
+/**
+ * 路由生成器
+ * RouteGenerator
+ * plugin\jzadmin\support\CodeGenerator
+ *
+ * Author:sym
+ * Date:2024/6/12 上午6:41
+ * Company:极智网络科技
+ */
 class RouteGenerator
 {
-    public static function handle($menuInfo)
+    public static function handle($menuInfo): void
     {
         if (!$menuInfo['enabled']) {
             return;
@@ -32,11 +41,11 @@ class RouteGenerator
         }
 
         // 刷新路由
-        runComman('admin:gen-route');
+        runCommand('admin:gen-route');
     }
 
-    public static function refresh()
+    public static function refresh(): void
     {
-        runComman('admin:gen-route');
+        runCommand('admin:gen-route');
     }
 }

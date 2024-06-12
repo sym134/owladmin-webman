@@ -15,12 +15,22 @@ use support\Container;
  * @method static bool createDatabase(string $name)
  * @method static bool dropDatabaseIfExists(string $name)
  * @method static bool hasTable(string $table)
+ * @method static bool hasView(string $view)
+ * @method static array getTables()
+ * @method static array getTableListing()
+ * @method static array getViews()
+ * @method static array getTypes()
  * @method static bool hasColumn(string $table, string $column)
  * @method static bool hasColumns(string $table, array $columns)
  * @method static void whenTableHasColumn(string $table, string $column, \Closure $callback)
  * @method static void whenTableDoesntHaveColumn(string $table, string $column, \Closure $callback)
- * @method static string getColumnType(string $table, string $column)
+ * @method static string getColumnType(string $table, string $column, bool $fullDefinition = false)
  * @method static array getColumnListing(string $table)
+ * @method static array getColumns(string $table)
+ * @method static array getIndexes(string $table)
+ * @method static array getIndexListing(string $table)
+ * @method static bool hasIndex(string $table, string|array $index, string|null $type = null)
+ * @method static array getForeignKeys(string $table)
  * @method static void table(string $table, \Closure $callback)
  * @method static void create(string $table, \Closure $callback)
  * @method static void drop(string $table)
@@ -29,7 +39,6 @@ use support\Container;
  * @method static void dropAllTables()
  * @method static void dropAllViews()
  * @method static void dropAllTypes()
- * @method static array getAllTables()
  * @method static void rename(string $from, string $to)
  * @method static bool enableForeignKeyConstraints()
  * @method static bool disableForeignKeyConstraints()
@@ -37,8 +46,12 @@ use support\Container;
  * @method static \Illuminate\Database\Connection getConnection()
  * @method static \Illuminate\Database\Schema\Builder setConnection(\Illuminate\Database\Connection $connection)
  * @method static void blueprintResolver(\Closure $resolver)
+ * @method static void macro(string $name, object|callable $macro)
+ * @method static void mixin(object $mixin, bool $replace = true)
+ * @method static bool hasMacro(string $name)
+ * @method static void flushMacros()
  *
- * @see \Illuminate\Support\Facades\Schema
+ * @see \Illuminate\Database\Schema\Builder
  */
 class Schema
 {

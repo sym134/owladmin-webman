@@ -2,12 +2,13 @@
 
 namespace plugin\jzadmin\exception;
 
+use support\Response;
 use plugin\jzadmin\Admin;
 
 class AdminException extends \Exception
 {
-    private $data;
-    private $doNotDisplayToast;
+    private mixed $data;
+    private mixed $doNotDisplayToast;
 
     public function __construct($message = "", $data = [], $doNotDisplayToast = 0)
     {
@@ -17,7 +18,7 @@ class AdminException extends \Exception
         $this->doNotDisplayToast = $doNotDisplayToast;
     }
 
-    public function render()
+    public function render(): Response
     {
         return Admin::response()->doNotDisplayToast($this->doNotDisplayToast)->fail($this->getMessage(), $this->data);
     }

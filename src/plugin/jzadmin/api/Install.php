@@ -13,7 +13,7 @@ class Install
      * 数据库连接
      */
     protected static $connection = 'plugin.admin.mysql';
-    
+
     /**
      * 安装
      *
@@ -25,9 +25,9 @@ class Install
         // 安装数据库
         static::installSql();
         // 导入菜单
-        if($menus = static::getMenus()) {
-            Menu::import($menus);
-        }
+        // if($menus = static::getMenus()) {
+        //     Menu::import($menus);
+        // }
     }
 
     /**
@@ -114,7 +114,7 @@ class Install
             Menu::delete($name);
         }
     }
-    
+
     /**
      * 安装SQL
      *
@@ -124,7 +124,7 @@ class Install
     {
         static::importSql(__DIR__ . '/../install.sql');
     }
-    
+
     /**
      * 卸载SQL
      *
@@ -152,7 +152,7 @@ class Install
         static::importSql($uninstallSqlFile);
         unlink($uninstallSqlFile);
     }
-    
+
     /**
      * 导入数据库
      *

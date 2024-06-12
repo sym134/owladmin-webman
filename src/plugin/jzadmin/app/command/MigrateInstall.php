@@ -1,17 +1,17 @@
 <?php
 
-namespace plugin\jzadmin\command;
+namespace plugin\jzadmin\app\command;
 
-use Illuminate\Database\Migrations\DatabaseMigrationRepository;
-use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Illuminate\Database\Migrations\DatabaseMigrationRepository;
 
 class MigrateInstall extends AbstractCommand
 {
     protected static $defaultName = 'migrate:install';
 
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setDescription('Create the migration repository')
@@ -21,7 +21,7 @@ class MigrateInstall extends AbstractCommand
         parent::configure();
     }
 
-    public function execute(InputInterface $input, OutputInterface $output)
+    public function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->bootstrap($input, $output);
 

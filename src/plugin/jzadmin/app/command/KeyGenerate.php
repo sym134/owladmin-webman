@@ -1,8 +1,6 @@
 <?php
 
-namespace plugin\jzadmin\command;
-
-use plugin\jzadmin\command\BaseCommand;
+namespace plugin\jzadmin\app\command;
 
 class KeyGenerate extends BaseCommand
 {

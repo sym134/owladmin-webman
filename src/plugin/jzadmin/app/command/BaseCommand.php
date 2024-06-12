@@ -1,12 +1,11 @@
 <?php
 
-namespace plugin\jzadmin\command;
+namespace plugin\jzadmin\app\command;
 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Process\Process;
 
 abstract class BaseCommand extends Command
 {
@@ -46,7 +45,7 @@ abstract class BaseCommand extends Command
         return $this->input->getOption($name);
     }
 
-    protected function call(string $command)
+    protected function call(string $command): void
     {
         // 获取当前应用程序实例
         $application = $this->getApplication();

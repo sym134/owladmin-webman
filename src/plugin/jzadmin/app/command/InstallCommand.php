@@ -1,12 +1,9 @@
 <?php
 
-namespace plugin\jzadmin\command;
+namespace plugin\jzadmin\app\command;
 
 use plugin\jzadmin\Admin;
-use Symfony\Component\Console\Application;
 use plugin\jzadmin\support\Cores\Database;
-use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Process\Process;
 
 class InstallCommand extends BaseCommand
 {

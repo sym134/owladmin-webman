@@ -6,7 +6,6 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use support\Db as DB;
 use plugin\jzadmin\trait\MakeTrait;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Artisan;
 use plugin\jzadmin\model\AdminCodeGenerator;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
@@ -122,7 +121,7 @@ class Generator
                         ->whereNotIn('COLUMN_NAME', ['created_at', 'updated_at', 'deleted_at'])
                         ->map(function ($v) {
                             $v['COLUMN_TYPE'] = strtolower($v['COLUMN_TYPE']);
-                            $v['DATA_TYPE']   = strtolower($v['DATA_TYPE']);
+                            $v['DATA_TYPE'] = strtolower($v['DATA_TYPE']);
 
                             if (Str::contains($v['COLUMN_TYPE'], 'unsigned')) {
                                 $v['DATA_TYPE'] .= '@unsigned';
@@ -202,62 +201,62 @@ class Generator
     {
         $record = AdminCodeGenerator::find($id);
 
-        $needs   = collect(filled($needs) ? $needs : $record->needs);
+        $needs = collect(filled($needs) ? $needs : $record->needs);
         $columns = collect($record->columns);
 
         $successMessage = fn($type, $path) => "<b class='text-success'>{$type} generated successfully!</b><br>{$path}<br><br>";
 
-        $paths   = [];
+        $paths = [];
         $message = '';
         try {
             // Model
-            if ($needs->contains('need_model')) {
-                $path = ModelGenerator::make()
-                    ->title($record->title)
-                    ->columns($columns)
-                    ->primary($record->primary_key)
-                    ->timestamps($record->need_timestamps)
-                    ->softDelete($record->soft_delete)
-                    ->generate($record->table_name, $record->model_name);
+            // if ($needs->contains('need_model')) {
+            //     $path = ModelGenerator::make()
+            //         ->title($record->title)
+            //         ->columns($columns)
+            //         ->primary($record->primary_key)
+            //         ->timestamps($record->need_timestamps)
+            //         ->softDelete($record->soft_delete)
+            //         ->generate($record->table_name, $record->model_name);
+            //
+            //     $message .= $successMessage('Model', $path);
+            //
+            //     $paths[] = $path;
+            // }
 
-                $message .= $successMessage('Model', $path);
-
-                $paths[] = $path;
-            }
-
-            // Controller
-            if ($needs->contains('need_controller')) {
-                $path = ControllerGenerator::make()
-                    ->title($record->title)
-                    ->primary($record->primary_key)
-                    ->title($record->title)
-                    ->tableName($record->table_name)
-                    ->pageInfo($record->page_info)
-                    ->serviceName($record->service_name)
-                    ->columns($columns)
-                    ->timestamps($record->need_timestamps)
-                    ->generate($record->controller_name);
-
-                $message .= $successMessage('Controller', $path);
-
-                $paths[] = $path;
-            }
-
-            // Service
-            if ($needs->contains('need_service')) {
-                $path = ServiceGenerator::make()
-                    ->title($record->title)
-                    ->generate($record->service_name, $record->model_name);
-
-                $message .= $successMessage('Service', $path);
-
-                $paths[] = $path;
-            }
-
-            // Route
-            RouteGenerator::handle($record->menu_info);
-
-            // Migration
+            // // Controller
+            // if ($needs->contains('need_controller')) {
+            //     $path = ControllerGenerator::make()
+            //         ->title($record->title)
+            //         ->primary($record->primary_key)
+            //         ->title($record->title)
+            //         ->tableName($record->table_name)
+            //         ->pageInfo($record->page_info)
+            //         ->serviceName($record->service_name)
+            //         ->columns($columns)
+            //         ->timestamps($record->need_timestamps)
+            //         ->generate($record->controller_name);
+            //
+            //     $message .= $successMessage('Controller', $path);
+            //
+            //     $paths[] = $path;
+            // }
+            //
+            // // Service
+            // if ($needs->contains('need_service')) {
+            //     $path = ServiceGenerator::make()
+            //         ->title($record->title)
+            //         ->generate($record->service_name, $record->model_name);
+            //
+            //     $message .= $successMessage('Service', $path);
+            //
+            //     $paths[] = $path;
+            // }
+            //
+            // // Route
+            // RouteGenerator::handle($record->menu_info);
+            //
+            // // Migration
             $migratePath = '';
             if ($needs->contains('need_database_migration')) {
                 $path = MigrationGenerator::make()
@@ -267,23 +266,23 @@ class Generator
                     ->softDelete($record->soft_delete)
                     ->generate($record->table_name, $columns, $record->model_name);
 
-                $message     .= $successMessage('Migration', $path);
+                $message .= $successMessage('Migration', $path);
                 $migratePath = str_replace(base_path(), '', $path);
-                $paths[]     = $path;
+                $paths[] = $path;
             }
 
             // 创建数据库表
             if ($needs->contains('need_create_table')) {
-                if (Schema::hasTable($record->table_name)) {
+                if (DB::schema()->hasTable($record->table_name)) { // webman
                     abort(HttpResponse::HTTP_BAD_REQUEST, "Table [{$record->table_name}] already exists!");
                 }
 
                 if ($migratePath) {
-                    Artisan::call('migrate', ['--path' => $migratePath]);
+                    $output = runCommand('migrate', ['--path' => $migratePath]); // webman
                 } else {
-                    Artisan::call('migrate');
+                    $output = runCommand('migrate'); // webman
                 }
-                $message .= $successMessage('Table', Artisan::output());
+                $message .= $successMessage('Table', $output); // webman
             }
         } catch (\Throwable $e) {
             app('files')->delete($paths);
@@ -296,9 +295,9 @@ class Generator
         return $message;
     }
 
-    public function preview($id)
+    public function preview($id): array
     {
-        $record  = AdminCodeGenerator::find($id);
+        $record = AdminCodeGenerator::find($id);
         $columns = collect($record->columns);
 
         try {
