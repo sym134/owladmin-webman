@@ -1,0 +1,16 @@
+<?php
+
+use Illuminate\Routing\Router;
+use Illuminate\Support\Facades\Route;
+
+Route::get('/{{module}}', fn() => \plugin\owladmin\Admin::view(config('{{module}}.admin.route.prefix')));
+
+Route::group([
+    'as'         => '{{module}}',
+    'domain'     => config('{{module}}.admin.route.domain'),
+    'prefix'     => config('{{module}}.admin.route.prefix'),
+    'middleware' => config('{{module}}.admin.route.middleware'),
+], function (Router $router) {
+    $router->resource('dashboard', \{{Namespace}}\HomeController::class);
+    $router->resource('system/settings', \{{Namespace}}\SettingController::class);
+});

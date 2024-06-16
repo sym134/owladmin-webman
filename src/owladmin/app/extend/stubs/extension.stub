@@ -1,0 +1,18 @@
+<?php
+
+namespace {namespace};
+
+use plugin\owladmin\renderer\TextControl;
+use plugin\owladmin\extend\ServiceProvider;
+
+class {className}ServiceProvider extends ServiceProvider
+{
+	{property}
+
+	public function settingForm()
+	{
+	    return $this->baseSettingForm()->body([
+            TextControl::make()->name('value')->label('Value')->required(true),
+	    ]);
+	}
+}

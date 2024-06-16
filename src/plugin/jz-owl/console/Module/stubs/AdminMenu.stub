@@ -1,8 +1,0 @@
-<?php
-
-namespace {{Namespace}};
-
-class AdminMenu extends \plugin\jzadmin\model\AdminMenu
-{
-    protected $table = '{{module}}_admin_menus';
-}
