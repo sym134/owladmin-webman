@@ -5,7 +5,7 @@ namespace plugin\jzadmin\console;
 use Illuminate\Support\Str;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Route;
-use plugin\jzadmin\controller\AdminController;
+use plugin\jzadmin\app\controller\AdminController;
 
 class IdeHelperCommand extends Command
 {

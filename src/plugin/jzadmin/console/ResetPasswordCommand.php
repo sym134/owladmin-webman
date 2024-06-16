@@ -2,7 +2,7 @@
 
 namespace plugin\jzadmin\console;
 
-use plugin\jzadmin\Admin;
+use plugin\jzadmin\app\Admin;
 use Illuminate\Console\Command;
 
 class ResetPasswordCommand extends Command
@@ -24,7 +24,7 @@ class ResetPasswordCommand extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): void
     {
         $users = Admin::adminUserModel()::query()->get();
 

@@ -3,8 +3,8 @@
 namespace plugin\jzadmin\console;
 
 use Illuminate\Console\Command;
-use plugin\jzadmin\model\AdminUser;
-use plugin\jzadmin\model\AdminRole;
+use plugin\jzadmin\app\model\AdminUser;
+use plugin\jzadmin\app\model\AdminRole;
 
 class CreateUserCommand extends Command
 {

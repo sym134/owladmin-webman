@@ -2,9 +2,9 @@
 
 namespace plugin\jzadmin\console;
 
-use plugin\jzadmin\Admin;
+use plugin\jzadmin\app\Admin;
 use Illuminate\Console\Command;
-use plugin\jzadmin\support\Cores\Database;
+use plugin\jzadmin\app\support\Cores\Database;
 
 class InstallCommand extends Command
 {
@@ -12,9 +12,9 @@ class InstallCommand extends Command
 
     protected $description = 'Install OwlAdmin';
 
-    protected $directory;
+    protected string $directory;
 
-    public function handle()
+    public function handle(): void
     {
         $this->initDatabase();
         $this->initAdminDirectory();
@@ -29,12 +29,12 @@ class InstallCommand extends Command
         }
     }
 
-    protected function setDirectory()
+    protected function setDirectory(): void
     {
         $this->directory = config('plugin.jzadmin.admin.directory');
     }
 
-    protected function initAdminDirectory()
+    protected function initAdminDirectory(): void
     {
         $this->setDirectory();
 
@@ -73,7 +73,7 @@ class InstallCommand extends Command
         $this->line('<info>AuthController file was created:</info> ' . str_replace(base_path(), '', $authController));
     }
 
-    protected function createBootstrapFile()
+    protected function createBootstrapFile(): void
     {
         $file = $this->directory . '/bootstrap.php';
 
@@ -82,7 +82,7 @@ class InstallCommand extends Command
         $this->line('<info>Bootstrap file was created:</info> ' . str_replace(base_path(), '', $file));
     }
 
-    protected function createRoutesFile()
+    protected function createRoutesFile(): void
     {
         $file = $this->directory . '/routes.php';
 
@@ -103,7 +103,7 @@ class InstallCommand extends Command
         $this->line('<info>HomeController file was created:</info> ' . str_replace(base_path(), '', $homeController));
     }
 
-    public function createSettingController()
+    public function createSettingController(): void
     {
         $settingController = $this->directory . '/Controllers/SettingController.php';
         $contents          = $this->getStub('SettingController');

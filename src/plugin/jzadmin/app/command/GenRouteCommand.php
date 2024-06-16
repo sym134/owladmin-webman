@@ -2,10 +2,13 @@
 
 namespace plugin\jzadmin\app\command;
 
-use plugin\jzadmin\service\AdminApiService;
+use Throwable;
+use plugin\jzadmin\app\service\AdminApiService;
 use Symfony\Component\Console\Input\InputOption;
-use plugin\jzadmin\service\AdminCodeGeneratorService;
-use plugin\jzadmin\support\CodeGenerator\ControllerGenerator;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+use plugin\jzadmin\app\service\AdminCodeGeneratorService;
+use plugin\jzadmin\app\support\CodeGenerator\ControllerGenerator;
 
 class GenRouteCommand extends BaseCommand
 {
@@ -19,7 +22,7 @@ class GenRouteCommand extends BaseCommand
         $this->addOption('excluded', '-excluded', InputOption::VALUE_REQUIRED, '--excluded选项的值');
     }
 
-    private function app(): void
+    private function app(): int
     {
         $content = <<<EOF
 <?php
@@ -56,7 +59,7 @@ EOF;
 
                 try {
                     require_once ControllerGenerator::guessClassFileName($_controller);
-                } catch (\Throwable $e) {
+                } catch (Throwable $e) {
                 }
 
                 if (!@class_exists($_controller)) {
@@ -76,7 +79,7 @@ EOF;
 
             $routes .= <<<EOF
     // {$item->title}
-    Route::{$item->method}('{$_route}', [\app\admin\controller\AdminApiController::class, 'index']);
+    Route::{$item->method}('{$_route}', [\plugin\jzadmin\app\controller\AdminApiController::class, 'index']);
 
 EOF;
         });
@@ -112,11 +115,12 @@ EOF;
             }
         }
 
-        $this->line('Route file generated successfully.');
+        $this->io->success('Route file generated successfully.');
+        return self::SUCCESS;
     }
 
-    public function handle(): void
+    public function handle(InputInterface $input, OutputInterface $output): int
     {
-        $this->app(); // webman 多应用路由
+        return $this->app(); // webman 多应用路由
     }
 }

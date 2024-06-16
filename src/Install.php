@@ -11,7 +11,7 @@ class Install
      */
     protected static $pathRelation = [
         'plugin/jzadmin' => 'plugin/jzadmin',
-        'admin-assets'   => 'public/admin-assets',
+        'admin-assets'   => 'admin-assets', // 发到根目录
     ];
 
     /**

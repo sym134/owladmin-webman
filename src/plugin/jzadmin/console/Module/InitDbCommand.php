@@ -2,9 +2,9 @@
 
 namespace plugin\jzadmin\console\Module;
 
+use plugin\jzadmin\app\Admin;
 use Illuminate\Console\Command;
-use plugin\jzadmin\Admin;
-use plugin\jzadmin\support\Cores\Database;
+use plugin\jzadmin\app\support\Cores\Database;
 
 class InitDbCommand extends Command
 {

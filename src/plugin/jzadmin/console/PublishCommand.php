@@ -78,7 +78,7 @@ class PublishCommand extends Command
         $this->files->deleteDirectory(public_path('admin-assets'));
     }
 
-    protected function getTags()
+    protected function getTags(): array
     {
         $tags = [];
 
@@ -107,7 +107,7 @@ class PublishCommand extends Command
         return $tags;
     }
 
-    protected function publishTag($tag)
+    protected function publishTag($tag): void
     {
         $published = false;
 
@@ -124,7 +124,7 @@ class PublishCommand extends Command
         }
     }
 
-    protected function pathsToPublish($tag)
+    protected function pathsToPublish($tag): array
     {
         return ServiceProvider::pathsToPublish(null, $tag);
     }
@@ -142,7 +142,7 @@ class PublishCommand extends Command
         return null;
     }
 
-    protected function publishFile($from, $to)
+    protected function publishFile($from, $to): void
     {
         if (! $this->files->exists($to) || $this->option('force')) {
             $this->createParentDirectory(dirname($to));
@@ -153,7 +153,7 @@ class PublishCommand extends Command
         }
     }
 
-    protected function publishDirectory($from, $to)
+    protected function publishDirectory($from, $to): void
     {
         $localClass = LocalFilesystemAdapter::class;
 
@@ -165,7 +165,7 @@ class PublishCommand extends Command
         $this->status($from, $to, 'Directory');
     }
 
-    protected function moveManagedFiles(MountManager $manager)
+    protected function moveManagedFiles(MountManager $manager): void
     {
         if (method_exists($manager, 'put')) {
             foreach ($manager->listContents('from://', true) as $file) {
@@ -190,19 +190,19 @@ class PublishCommand extends Command
         }
     }
 
-    protected function isExceptPath($manager, $path)
+    protected function isExceptPath($manager, $path): bool
     {
         return $manager->has('to://'.$path) && Str::contains($path, ['/menu.php', '/global.php']);
     }
 
-    protected function createParentDirectory($directory)
+    protected function createParentDirectory($directory): void
     {
         if (! $this->files->isDirectory($directory)) {
             $this->files->makeDirectory($directory, 0755, true);
         }
     }
 
-    protected function status($from, $to, $type)
+    protected function status($from, $to, $type): void
     {
         $from = str_replace(base_path(), '', realpath($from));
 

@@ -11,12 +11,7 @@ abstract class BaseCommand extends Command
 {
     protected OutputInterface $output;
     protected InputInterface $input;
-    private SymfonyStyle $io;
-
-    protected function configure()
-    {
-        // 在这里配置通用的命令参数和选项
-    }
+    protected SymfonyStyle $io;
 
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -24,8 +19,7 @@ abstract class BaseCommand extends Command
         $this->output = $output;
         $this->input = $input;
         $this->io = new SymfonyStyle($input, $output);
-        $this->handle();
-        return self::SUCCESS;
+        return $this->handle($input, $output);
     }
 
     protected function line(string $string): void
@@ -38,7 +32,7 @@ abstract class BaseCommand extends Command
         $this->io->warning($string);
     }
 
-    abstract public function handle();
+    abstract public function handle(InputInterface $input, OutputInterface $output);
 
     protected function option($name)
     {

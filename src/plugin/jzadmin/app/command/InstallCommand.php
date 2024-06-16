@@ -2,8 +2,10 @@
 
 namespace plugin\jzadmin\app\command;
 
-use plugin\jzadmin\Admin;
-use plugin\jzadmin\support\Cores\Database;
+use plugin\jzadmin\app\Admin;
+use plugin\jzadmin\app\support\Cores\Database;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
 class InstallCommand extends BaseCommand
 {
@@ -12,7 +14,7 @@ class InstallCommand extends BaseCommand
     /**
      * @var array|mixed|null
      */
-    private $directory;
+    private mixed $directory;
 
 
     /**
@@ -23,9 +25,12 @@ class InstallCommand extends BaseCommand
     }
 
     /**
+     * @param InputInterface  $input
+     * @param OutputInterface $output
+     *
      * @return void
      */
-    public function handle()
+    public function handle(InputInterface $input, OutputInterface $output): void
     {
         $this->initDatabase();
         // $this->initAdminDirectory();
@@ -49,7 +54,7 @@ class InstallCommand extends BaseCommand
         }
     }
 
-    protected function initAdminDirectory()
+    protected function initAdminDirectory(): void
     {
         $this->setDirectory();
 
@@ -76,7 +81,7 @@ class InstallCommand extends BaseCommand
 
     protected function setDirectory(): void
     {
-        $this->directory = config('plugin.jizhi.jz-admin.admin.directory');
+        $this->directory = config('plugin.jzadmin.admin.directory');
     }
 
     private function createAuthController()
@@ -137,7 +142,7 @@ use Illuminate\Support\Facades\Route;', 'use Webman\Route;', $contents);
         $contents = str_replace('use Illuminate\Http\Resources\Json\JsonResource;', '', $contents);
         $contents = str_replace('JsonResponse|JsonResource', 'Response', $contents);
 
-        $this->filePut($path, $file_name, str_replace('{{Namespace}}', config('plugin.jizhi.jz-admin.admin.route.namespace'), $contents));
+        $this->filePut($path, $file_name, str_replace('{{Namespace}}', config('plugin.jzadmin.admin.route.namespace'), $contents));
 
         $this->line('<info>HomeController file was created:</info> ' . str_replace(base_path(), '', $path . $file_name));
     }
@@ -159,7 +164,7 @@ use Illuminate\Support\Facades\Route;', 'use Webman\Route;', $contents);
         // 替换掉laravel
         $contents = str_replace('use Illuminate\Http\Request;', 'use support\Request;', $contents);
 
-        $this->filePut($path, $file_name, str_replace('{{Namespace}}', config('plugin.jizhi.jz-admin.admin.route.namespace'), $contents));
+        $this->filePut($path, $file_name, str_replace('{{Namespace}}', config('plugin.jzadmin.admin.route.namespace'), $contents));
         $this->line('<info>SettingController file was created:</info> ' . str_replace(base_path(),
                 '',
                 $path . $file_name));

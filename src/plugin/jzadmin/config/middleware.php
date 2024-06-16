@@ -1,10 +1,14 @@
 <?php
 
-use plugin\jzadmin\middleware\Permission;
-use plugin\jzadmin\middleware\Authenticate;
+use plugin\jzadmin\app\middleware\Permission;
+use plugin\jzadmin\app\middleware\ForceHttps;
+use plugin\jzadmin\app\middleware\Authenticate;
+use plugin\jzadmin\app\middleware\AutoSetLocale;
 
 return [
-    'admin' => [
+    '' => [
+        ForceHttps::class,
+        AutoSetLocale::class,
         Authenticate::class,
         Permission::class,
     ],

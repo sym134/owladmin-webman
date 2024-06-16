@@ -2,9 +2,9 @@
 
 namespace plugin\jzadmin\console\Module;
 
-use plugin\jzadmin\Admin;
+use plugin\jzadmin\app\Admin;
 use Illuminate\Console\Command;
-use plugin\jzadmin\support\Cores\Database;
+use plugin\jzadmin\app\support\Cores\Database;
 
 class InitCommand extends Command
 {
@@ -57,13 +57,13 @@ class InitCommand extends Command
         return $modules;
     }
 
-    protected function setDirectory()
+    protected function setDirectory(): void
     {
         $this->directory = Admin::module()->getModulePath($this->module);
 
-        $this->makeDir('Models');
-        $this->makeDir('Controllers');
-        $this->makeDir('Services');
+        $this->makeDir('model');
+        $this->makeDir('controller');
+        $this->makeDir('service');
     }
 
     protected function getLowerName()

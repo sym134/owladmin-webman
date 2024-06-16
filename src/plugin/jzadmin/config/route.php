@@ -1,27 +1,27 @@
 <?php
 
 use Webman\Route;
-use plugin\jzadmin\middleware\Permission;
-use plugin\jzadmin\middleware\Authenticate;
-use plugin\jzadmin\controller\AuthController;
-use plugin\jzadmin\controller\HomeController;
-use plugin\jzadmin\controller\IndexController;
-use plugin\jzadmin\controller\AdminRoleController;
-use plugin\jzadmin\controller\AdminUserController;
-use plugin\jzadmin\controller\AdminMenuController;
-use plugin\jzadmin\controller\DevTools\ApiController;
-use plugin\jzadmin\controller\DevTools\PagesController;
-use plugin\jzadmin\controller\DevTools\EditorController;
-use plugin\jzadmin\controller\AdminPermissionController;
-use plugin\jzadmin\controller\DevTools\ExtensionController;
-use plugin\jzadmin\controller\DevTools\RelationshipController;
-use plugin\jzadmin\controller\DevTools\CodeGeneratorController;
-
-Route::get('/admin', function () {
-    return view('admin-assets/index');
-});
+use plugin\jzadmin\app\Admin;
+use plugin\jzadmin\app\middleware\Permission;
+use plugin\jzadmin\app\middleware\Authenticate;
+use plugin\jzadmin\app\controller\AuthController;
+use plugin\jzadmin\app\controller\HomeController;
+use plugin\jzadmin\app\controller\IndexController;
+use plugin\jzadmin\app\controller\AdminRoleController;
+use plugin\jzadmin\app\controller\AdminUserController;
+use plugin\jzadmin\app\controller\AdminMenuController;
+use plugin\jzadmin\app\controller\DevTools\ApiController;
+use plugin\jzadmin\app\controller\DevTools\PagesController;
+use plugin\jzadmin\app\controller\DevTools\EditorController;
+use plugin\jzadmin\app\controller\AdminPermissionController;
+use plugin\jzadmin\app\controller\DevTools\ExtensionController;
+use plugin\jzadmin\app\controller\DevTools\RelationshipController;
+use plugin\jzadmin\app\controller\DevTools\CodeGeneratorController;
 
 Route::get('/admin1',[plugin\jzadmin\app\controller\IndexController::class,'index']);
+
+Route::get('/admin', fn() => Admin::view());
+
 
 Route::group('/' . config('plugin.jzadmin.admin.route.prefix'), function () {
 
@@ -145,6 +145,6 @@ Route::group('/' . config('plugin.jzadmin.admin.route.prefix'), function () {
 
 
 })->middleware([
-    Authenticate::class,
-    Permission::class
+    // Authenticate::class,
+    // Permission::class
 ]);

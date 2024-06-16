@@ -1,10 +1,14 @@
 <?php
-use Illuminate\Database\Capsule\Manager;
-$capsule = new Manager();
-$capsule->addConnection(config('database.connections.mysql'));
+
+use plugin\jzadmin\app\model\AdminUser;
+use plugin\jzadmin\app\model\AdminRole;
+use plugin\jzadmin\app\model\AdminMenu;
+use plugin\jzadmin\app\model\AdminPermission;
+
 return [
     // 应用名称
     'name'           => 'Owl Admin',
+    'app_key'        => env('APP_KEY', ''),
 
     // 应用 logo
     'logo'           => '/admin-assets/logo.png',
@@ -14,9 +18,6 @@ return [
 
     // 应用安装目录
     'directory'      => app_path('admin'), // webman
-
-    // 引导文件
-    // 'bootstrap'      => app_path('Admin/bootstrap.php'),
 
     // 应用路由
     'route'          => [
@@ -47,7 +48,7 @@ return [
         'providers'     => [
             'admin' => [
                 'driver' => 'eloquent',
-                'model'  => \plugin\jzadmin\model\AdminUser::class, // webman
+                'model'  => AdminUser::class, // webman
             ],
         ],
         'except'        => [
@@ -83,15 +84,15 @@ return [
         'title'              => '%title% | OwlAdmin',
         'header'             => [
             // 是否显示 [刷新] 按钮
-            'refresh'      => true,
+            'refresh'       => true,
             // 是否显示 [暗色模式] 按钮
-            'dark'         => true,
+            'dark'          => true,
             // 是否显示 [全屏] 按钮
-            'full_screen'  => true,
+            'full_screen'   => true,
             // 是否显示 [多语言] 按钮
             'locale_toggle' => true,
             // 是否显示 [主题配置] 按钮
-            'theme_config' => true,
+            'theme_config'  => true,
         ],
         // 多语言选项
         'locale_options'     => [
@@ -117,23 +118,12 @@ return [
     ],
 
     'models' => [
-        'admin_user'       => \plugin\jzadmin\model\AdminUser::class,
-        'admin_role'       => \plugin\jzadmin\model\AdminRole::class,
-        'admin_menu'       => \plugin\jzadmin\model\AdminMenu::class,
-        'admin_permission' => \plugin\jzadmin\model\AdminPermission::class,
+        'admin_user'       => AdminUser::class,
+        'admin_role'       => AdminRole::class,
+        'admin_menu'       => AdminMenu::class,
+        'admin_permission' => AdminPermission::class,
     ],
 
     'modules' => [
     ],
-
-    // webman
-    'migrate'=>[
-        'default_environment' => 'developpment',
-        'paths' => [
-            "migrations" => "database/migrations",
-            "seeds"      => "database/seeders"
-        ],
-        'migration_table' => 'migrations',
-        'db' => $capsule->getDatabaseManager()
-    ]
 ];

@@ -1,0 +1,33 @@
+<?php
+
+use Illuminate\Database\Schema\Blueprint;
+use Eloquent\Migrations\Migrations\Migration;
+
+return new class extends Migration
+{
+     /**
+      * Run the migrations.
+      *
+      * @param
+      *
+      * @return void
+      */
+     public function up(): void
+     {
+        $this->schema()->create('{{ table }}', function (Blueprint $table) {
+            {{ content }}
+        });
+     }
+
+     /**
+      * Reverse the migrations.
+      *
+      * @param
+      *
+      * @return void
+      */
+     public function down(): void
+     {
+        $this->schema()->dropIfExists('{{ table }}');
+     }
+};
