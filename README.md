@@ -1,0 +1,71 @@
+owladmin-webman
+==================
+
+基于 [OwlAdmin](https://github.com/slowlyo/owl-admin) 修改的 Webman 扩展包。
+
+
+## webman 安装
+
+```shell
+composer create-project workerman/webman
+cd webman
+```
+## 数据库配置文件位置为 config/database.php
+```shell
+return [
+ // 默认数据库
+ 'default' => 'mysql',
+ // 各种数据库配置
+ 'connections' => [
+
+     'mysql' => [
+         'driver'      => 'mysql',
+         'host'        => '127.0.0.1',
+         'port'        => 3306,
+         'database'    => 'webman',
+         'username'    => 'webman',
+         'password'    => '',
+         'unix_socket' => '',
+         'charset'     => 'utf8',
+         'collation'   => 'utf8_unicode_ci',
+         'prefix'      => '',
+         'strict'      => true,
+         'engine'      => null,
+     ],
+ ],
+];
+```
+
+## 安装
+
+```shell
+composer require jizhi/owladmin-webman
+```
+
+## 配置 .env
+
+```env
+# 语言
+APP_LOCALE=zh_CN
+
+# admin 登录验证码
+ADMIN_LOGIN_CAPTCHA=true
+# admin https
+ADMIN_HTTPS=false
+# admin开发工具
+ADMIN_SHOW_DEVELOPMENT_TOOLS=true
+# 显示自动生成权限按钮
+ADMIN_SHOW_AUTO_GENERATE_PERMISSION_BUTTON=true
+DB_CONNECTION=mysql
+```
+
+## 运行
+
+```shell
+php start.php start
+```
+
+## 访问
+
+http://127.0.0.1:8780/admin
+
