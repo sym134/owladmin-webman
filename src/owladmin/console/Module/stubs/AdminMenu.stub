@@ -1,8 +1,0 @@
-<?php
-
-namespace {{Namespace}};
-
-class AdminMenu extends \plugin\owladmin\model\AdminMenu
-{
-    protected $table = '{{module}}_admin_menus';
-}

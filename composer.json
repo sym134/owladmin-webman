@@ -1,8 +1,9 @@
 {
-  "name": "jizhi/jzadmin",
+  "name": "jizhi/owladmin",
   "type": "library",
   "license": "MIT",
-  "description": "Webman plugin jizhi/jzadmin",
+  "version": "1.0.0",
+  "description": "Webman plugin jizhi/owladmin",
   "require": {
     "php": ">=8.1",
     "illuminate/database": "^10.42",
@@ -10,7 +11,6 @@
     "illuminate/events": "^10.42",
     "illuminate/redis": "^10.42",
     "illuminate/console": "^10.42",
-    "vlucas/phpdotenv": "^5.6",
     "symfony/cache": "^6.4",
     "ramsey/uuid": "^4.7",
     "endroid/qr-code": "^5.0",
@@ -32,11 +32,13 @@
     "psr/container": "^1.1.1",
     "php-di/php-di": "^6",
     "doctrine/annotations": "^1.14",
-    "pxianyu/migrations": "dev-main"
+    "pxianyu/migrations": "dev-main",
+    "rap2hpoutre/fast-excel": "^5.5",
+    "vlucas/phpdotenv": "^5.6"
   },
   "autoload": {
     "psr-4": {
-      "Jizhi\\Jzadmin\\": "src"
+      "Jizhi\\Owladmin\\": "src"
     }
   },
   "minimum-stability": "dev",

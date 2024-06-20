@@ -1,6 +1,6 @@
 <?php
 
-namespace Jizhi\Jzadmin;
+namespace Jizhi\Owladmin;
 
 class Install
 {
@@ -10,8 +10,9 @@ class Install
      * @var array
      */
     protected static $pathRelation = [
-        'plugin/jzadmin' => 'plugin/jzadmin',
-        'admin-assets'   => 'admin-assets', // 发到根目录
+        'plugin/owladmin'          => 'plugin/owladmin',
+        'admin-assets'             => 'public/admin-assets',
+        'plugin/owladmin/resource' => 'resource',
     ];
 
     /**
