@@ -2,7 +2,7 @@
   "name": "jizhi/owladmin",
   "type": "library",
   "license": "MIT",
-  "version": "1.0.0",
+  "version": "3.7.3",
   "description": "Webman plugin jizhi/owladmin",
   "require": {
     "php": ">=8.1",
