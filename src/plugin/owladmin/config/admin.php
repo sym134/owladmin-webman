@@ -8,7 +8,6 @@ use plugin\owladmin\app\model\AdminPermission;
 return [
     // 应用名称
     'name'           => 'Owl Admin',
-    'app_key'        => env('APP_KEY', ''),
 
     // 应用 logo
     'logo'           => '/admin-assets/logo.png',

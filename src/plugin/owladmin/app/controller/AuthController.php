@@ -18,14 +18,14 @@ class AuthController extends AdminController
 
     public function login(Request $request)
     {
-        // if (Admin::config('admin.auth.login_captcha')) {
-        //     if (!$request->has('captcha')) {
-        //         return $this->response()->fail(admin_trans('admin.required', ['attribute' => admin_trans('admin.captcha')]));
-        //     }
-        //     if (strtolower(cache()->pull($request->post('sys_captcha'))) != strtolower($request->post('captcha'))) { // webman $request->post
-        //         return $this->response()->fail(admin_trans('admin.captcha_error'));
-        //     }
-        // }
+        if (Admin::config('admin.auth.login_captcha')) {
+            if (!$request->has('captcha')) {
+                return $this->response()->fail(admin_trans('admin.required', ['attribute' => admin_trans('admin.captcha')]));
+            }
+            if (strtolower(cache()->pull($request->post('sys_captcha'))) != strtolower($request->post('captcha'))) { // webman $request->post
+                return $this->response()->fail(admin_trans('admin.captcha_error'));
+            }
+        }
 
         try {
             $validator = validate([
@@ -39,9 +39,9 @@ class AuthController extends AdminController
                 abort(400, $validator->getError());
             }
 
-            $user = Admin::adminUserModel()::query()->where('username', $request->input('username'))->first();
+            $user = Admin::adminUserModel()::query()->where('username', $request->post('username'))->first();
 
-            if ($user && Hash::check($request->password, $user->password)) {
+            if ($user && Hash::check($request->post('password'), $user->password)) {
                 if (!$user->enabled) {
                     return $this->response()->fail(admin_trans('admin.user_disabled'));
                 }

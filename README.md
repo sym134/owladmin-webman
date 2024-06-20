@@ -42,6 +42,10 @@ return [
 composer require jizhi/owladmin-webman
 ```
 
+## 配置auto config/plugin/shopwwi/auth/app.php
+
+
+
 ## 配置 .env
 
 ```env
@@ -57,6 +61,25 @@ ADMIN_SHOW_DEVELOPMENT_TOOLS=true
 # 显示自动生成权限按钮
 ADMIN_SHOW_AUTO_GENERATE_PERMISSION_BUTTON=true
 DB_CONNECTION=mysql
+```
+
+## 配置auth config/plugin/shopwwi/auth/app.php
+
+```php
+ return [
+     'enable' => true,
+     'app_key' => 'base64:N721v3Gt2I58HH7oiU7a70PQ+i8ekPWRqwI+JSnM1wo=',
+     'guard' => [
+    // ........
+         // 添加 admin
+         'admin' => [
+             'key' => 'id',
+             'field' => ['id','name','email','mobile'], //设置允许写入扩展中的字段
+             'num' => 0, //-1为不限制终端数量 0为只支持一个终端在线 大于0为同一账号同终端支持数量 建议设置为1 则同一账号同终端在线1个
+             'model'=> \plugin\owladmin\app\model\AdminUser::class
+         ]
+     ],
+    // ........
 ```
 
 ## 运行

@@ -80,7 +80,7 @@ class Menu
 
                 if (!empty($children)) {
                     $_temp['component'] = 'amis';
-                    $_temp['children']  = $children;
+                    $_temp['children'] = $children;
                 }
 
                 $data[] = $_temp;
@@ -190,20 +190,11 @@ class Menu
                 ],
                 'children'  => [
                     [
-                        'name'      => 'dev_tools_extensions',
-                        'path'      => '/dev_tools/extensions',
-                        'component' => 'amis',
-                        'meta'      => [
-                            'title' => admin_trans('admin.extensions.menu'),
-                            'icon'  => 'ion:extension-puzzle-outline',
-                        ],
-                    ],
-                    [
                         'name'      => 'dev_tools_plugin',
                         'path'      => '/dev_tools/plugin',
                         'component' => 'amis',
                         'meta'      => [
-                            'title' => '拓展2',
+                            'title' => admin_trans('admin.extensions.menu'),
                             'icon'  => 'ion:extension-puzzle-outline',
                         ],
                     ],

@@ -2,6 +2,7 @@
 
 namespace plugin\owladmin\app\support\Cores;
 
+use support\Response;
 use Webman\Http\Request;
 use Illuminate\Support\Str;
 use plugin\owladmin\app\Admin;
@@ -62,7 +63,7 @@ class Permission
      *
      * @return bool
      */
-    public function permissionIntercept($request, $args): bool
+    public function permissionIntercept(\support\Request $request, $args): bool
     {
         if (Admin::config('admin.auth.permission') === false) {
             return false;
