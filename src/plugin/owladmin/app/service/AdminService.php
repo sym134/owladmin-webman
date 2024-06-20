@@ -218,7 +218,7 @@ abstract class AdminService
      */
     public function searchable($query): void
     {
-        collect(array_keys(request()->query()))
+        collect(array_keys(request()->all()))
             ->intersect($this->getTableColumns())
             ->map(function ($field) use ($query) {
                 $query->when(request()->input($field), function ($query) use ($field) {

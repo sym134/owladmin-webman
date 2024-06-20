@@ -13,6 +13,7 @@ class Install
         'plugin/owladmin'          => 'plugin/owladmin',
         'admin-assets'             => 'public/admin-assets',
         'plugin/owladmin/resource' => 'resource',
+        'plugin/owladmin/database' => 'database',
     ];
 
     /**

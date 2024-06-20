@@ -42,10 +42,6 @@ return [
 composer require jizhi/owladmin-webman
 ```
 
-## 配置auto config/plugin/shopwwi/auth/app.php
-
-
-
 ## 配置 .env
 
 ```env
