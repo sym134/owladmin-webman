@@ -28,11 +28,12 @@ class InstallCommand extends BaseCommand
      * @param InputInterface  $input
      * @param OutputInterface $output
      *
-     * @return void
+     * @return int
      */
-    public function handle(InputInterface $input, OutputInterface $output): void
+    public function handle(InputInterface $input, OutputInterface $output): int
     {
         $this->initDatabase();
+        return self::SUCCESS;
     }
 
     /**

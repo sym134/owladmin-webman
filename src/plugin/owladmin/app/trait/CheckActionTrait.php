@@ -9,9 +9,9 @@ trait CheckActionTrait
      *
      * @return bool
      */
-    public function actionOfGetData()
+    public function actionOfGetData(): bool
     {
-        return request()->_action == 'getData';
+        return request()->input('_action') == 'getData';
     }
 
     /**
@@ -19,9 +19,9 @@ trait CheckActionTrait
      *
      * @return bool
      */
-    public function actionOfExport()
+    public function actionOfExport(): bool
     {
-        return request()->_action == 'export';
+        return request()->input('_action') == 'export';
     }
 
     /**
@@ -29,9 +29,9 @@ trait CheckActionTrait
      *
      * @return bool
      */
-    public function actionOfQuickEdit()
+    public function actionOfQuickEdit(): bool
     {
-        return request()->_action == 'quickEdit';
+        return request()->input('_action') == 'quickEdit';
     }
 
     /**
@@ -39,8 +39,8 @@ trait CheckActionTrait
      *
      * @return bool
      */
-    public function actionOfQuickEditItem()
+    public function actionOfQuickEditItem(): bool
     {
-        return request()->_action == 'quickEditItem';
+        return request()->input('_action') == 'quickEditItem';
     }
 }
