@@ -141,7 +141,7 @@ class PluginController extends AdminController
                             'method' => 'post',
                             'data'   => [
                                 'id'      => '${id}',
-                                'enabled' => '${enabled}',
+                                'enabled' => '${!enabled}',
                             ],
                         ])
                         ->confirmText('${enabled ? "' . admin_trans('admin.extensions.disable_confirm') . '" : "' . admin_trans('admin.extensions.enable_confirm') . '"}'),

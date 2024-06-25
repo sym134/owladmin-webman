@@ -75,7 +75,7 @@ class ApiController extends AdminController
      */
     public function addTemplate(): Response
     {
-        $template  = request()->input('template');
+        $template = request()->input('template');
         $className = Str::between($template, 'class ', ' extends AdminBaseApi');
         if (!$className) {
             $className = Str::between($template, 'class ', ' extends \plugin\owladmin\support\Apis\AdminBaseApi');
@@ -88,6 +88,11 @@ class ApiController extends AdminController
         admin_abort_if(is_file($file) && !request()->input('overlay'), admin_trans('admin.apis.template_exists'));
 
         try {
+            $dir = dirname($file);
+
+            if (!is_dir($dir)) {
+                appw('files')->makeDirectory($dir, 0755, true);
+            }
             appw('files')->put($file, $template);
         } catch (\Throwable $e) {
             return $this->response()->fail(admin_trans('admin.save_failed'));

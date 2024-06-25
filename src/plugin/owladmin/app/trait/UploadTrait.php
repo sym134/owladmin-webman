@@ -2,9 +2,12 @@
 
 namespace plugin\owladmin\app\trait;
 
+use support\Response;
+use Illuminate\Support\Str;
 use plugin\owladmin\app\Admin;
 use Illuminate\Support\Facades\Storage;
 
+// todo 部分功能不支持webman
 trait UploadTrait
 {
     /**
@@ -12,12 +15,12 @@ trait UploadTrait
      *
      * @return string
      */
-    public function uploadImagePath()
+    public function uploadImagePath(): string
     {
         return admin_url('upload_image');
     }
 
-    public function uploadImage()
+    public function uploadImage(): Response
     {
         return $this->upload('image');
     }
@@ -27,12 +30,12 @@ trait UploadTrait
      *
      * @return string
      */
-    public function uploadFilePath()
+    public function uploadFilePath(): string
     {
         return admin_url('upload_file');
     }
 
-    public function uploadFile()
+    public function uploadFile(): Response
     {
         return $this->upload();
     }
@@ -40,14 +43,16 @@ trait UploadTrait
     /**
      * 富文本编辑器上传路径
      *
+     * @param bool $needPrefix
+     *
      * @return string
      */
-    public function uploadRichPath($needPrefix = false)
+    public function uploadRichPath(bool $needPrefix = false): string
     {
         return admin_url('upload_rich', $needPrefix);
     }
 
-    public function uploadRich()
+    public function uploadRich(): Response
     {
         $fromWangEditor = false;
         $file           = request()->file('file');
@@ -75,7 +80,7 @@ trait UploadTrait
         return $this->response()->additional(compact('link'))->success(compact('link'));
     }
 
-    protected function upload($type = 'file')
+    protected function upload($type = 'file'): Response
     {
         $file = request()->file('file');
 
@@ -86,5 +91,71 @@ trait UploadTrait
         $path = $file->store(Admin::config('admin.upload.directory.' . $type), Admin::config('admin.upload.disk'));
 
         return $this->response()->success(['value' => $path]);
+    }
+
+    public function chunkUploadStart(): Response
+    {
+        $uploadId = Str::uuid();
+
+        cache()->put($uploadId, [], 600);
+
+        appw('filesystem')->makeDirectory(base_path('public/chunk/' . $uploadId));
+
+        return $this->response()->success(compact('uploadId'));
+    }
+
+    public function chunkUpload(): Response
+    {
+        $uploadId   = request()->input('uploadId');
+        $partNumber = request()->input('partNumber');
+        $file       = request()->file('file');
+
+        $path = 'chunk/' . $uploadId;
+
+        $file->storeAs($path, $partNumber, 'public');
+
+        $eTag = md5(Storage::disk('public')->get($path . '/' . $partNumber));
+
+        return $this->response()->success(compact('eTag'));
+    }
+
+    public function chunkUploadFinish(): Response
+    {
+        $fileName = request()->file('filename');
+        $partList = request()->input('partList');
+        $uploadId = request()->input('uploadId');
+        $type     = request()->input('t');
+
+        $ext      = pathinfo($fileName, PATHINFO_EXTENSION);
+        $path     = $type . '/' . $uploadId . '.' . $ext;
+        $fullPath = base_path('public/' . $path);
+
+        $dir = dirname($fullPath);
+        if (!is_dir($dir)) {
+            appw('filesystem')->makeDirectory($dir);
+        }
+
+        for ($i = 0; $i < count($partList); $i++) {
+            $partNumber = $partList[$i]['partNumber'];
+            $eTag       = $partList[$i]['eTag'];
+
+            $partPath = 'chunk/' . $uploadId . '/' . $partNumber;
+
+            $partETag = md5(Storage::disk('public')->get($partPath));
+
+            if ($eTag != $partETag) {
+                return $this->response()->fail('分片上传失败');
+            }
+
+            file_put_contents($fullPath, Storage::disk('public')->get($partPath), FILE_APPEND);
+        }
+
+        clearstatcache();
+
+        $value = admin_resource_full_path($path);
+
+        appw('files')->deleteDirectory(base_path('public/chunk/' . $uploadId));
+
+        return $this->response()->success(['value' => $value], '上传成功');
     }
 }

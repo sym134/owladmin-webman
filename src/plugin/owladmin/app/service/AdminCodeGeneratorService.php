@@ -48,7 +48,10 @@ class AdminCodeGeneratorService extends AdminService
 
     public function filterData($data): array
     {
-        admin_abort_if(!data_get($data, 'columns'), admin_trans('admin.required', ['attribute' => admin_trans('admin.code_generators.column_info')]));
+        admin_abort_if(
+            !data_get($data, 'columns'),
+            admin_trans('admin.required', ['attribute' => admin_trans('admin.code_generators.column_info')])
+        );
 
         admin_abort_if(
             collect($data['columns'])->pluck('name')->unique()->count() != count($data['columns']),
@@ -76,19 +79,6 @@ class AdminCodeGeneratorService extends AdminService
             }
             if (data_get($columnItem, 'detail_component.component_property_options')) {
                 unset($columnItem['detail_component']['component_property_options']);
-            }
-            if (filled(data_get($columnItem, 'list_filter'))) {
-                foreach ($columnItem['list_filter'] as &$filterItem) {
-                    if (data_get($filterItem, 'filter.component_property_options')) {
-                        unset($filterItem['filter']['component_property_options']);
-                    }
-                }
-            }
-
-            $filterInputNames = array_filter(data_get($columnItem, 'list_filter.*.input_name', []));
-
-            if (count($filterInputNames) != count(array_unique($filterInputNames))) {
-                admin_abort(admin_trans('admin.code_generators.duplicate_filter_input_name', ['column' => $columnItem['name']]));
             }
         }
 

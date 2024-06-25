@@ -3,6 +3,15 @@
 namespace plugin\owladmin\app\trait;
 
 use plugin\owladmin\app\Admin;
+use plugin\owladmin\app\renderer\Page;
+use plugin\owladmin\app\renderer\Form;
+use plugin\owladmin\app\renderer\Service;
+use plugin\owladmin\app\renderer\Operation;
+use plugin\owladmin\app\renderer\CRUDTable;
+use plugin\owladmin\app\renderer\LinkAction;
+use plugin\owladmin\app\renderer\OtherAction;
+use plugin\owladmin\app\renderer\DialogAction;
+use plugin\owladmin\app\renderer\ConditionBuilderControl;
 
 
 trait ElementTrait
@@ -10,9 +19,9 @@ trait ElementTrait
     /**
      * 基础页面
      *
-     * @return \plugin\owladmin\app\renderer\Page
+     * @return Page
      */
-    protected function basePage()
+    protected function basePage(): Page
     {
         return amis()->Page()->className('m:overflow-auto');
     }
@@ -20,9 +29,9 @@ trait ElementTrait
     /**
      * 返回列表按钮
      *
-     * @return \plugin\owladmin\app\renderer\OtherAction
+     * @return OtherAction
      */
-    protected function backButton()
+    protected function backButton(): OtherAction
     {
         $path   = str_replace(Admin::config('admin.route.prefix'), '', request()->path());
         $script = sprintf('window.$owl.hasOwnProperty(\'closeTabByPath\') && window.$owl.closeTabByPath(\'%s\')', $path);
@@ -37,7 +46,7 @@ trait ElementTrait
     /**
      * 批量删除按钮
      */
-    protected function bulkDeleteButton()
+    protected function bulkDeleteButton(): DialogAction
     {
         return amis()->DialogAction()
             ->label(admin_trans('admin.delete'))
@@ -61,36 +70,48 @@ trait ElementTrait
     /**
      * 新增按钮
      *
-     * @param bool   $dialog
-     * @param string $dialogSize
+     * @param bool|string $dialog     是否弹窗, 弹窗: true|dialog, 抽屉: drawer,
+     * @param string      $dialogSize 弹窗大小, 默认: md, 可选值: xs | sm | md | lg | xl | full
+     * @param string      $title      弹窗标题 & 按钮文字, 默认: 新增
      *
-     * @return \plugin\owladmin\app\renderer\DialogAction|\plugin\owladmin\app\renderer\LinkAction
+     * @return DialogAction|LinkAction
      */
-    protected function createButton(bool $dialog = false, string $dialogSize = '')
+    protected function createButton(bool|string $dialog = false, string $dialogSize = 'md', string $title = ''): LinkAction|DialogAction
     {
+        $title  = $title ?: admin_trans('admin.create');
+        $button = amis()->LinkAction()->link($this->getCreatePath());
+
         if ($dialog) {
             $form = $this->form(false)->canAccessSuperData(false)->api($this->getStorePath())->onEvent([]);
 
-            $button = amis()->DialogAction()->dialog(
-                amis()->Dialog()->title(admin_trans('admin.create'))->body($form)->size($dialogSize)
-            );
-        } else {
-            $button = amis()->LinkAction()->link($this->getCreatePath());
+            if ($dialog === 'drawer') {
+                $button = amis()->DrawerAction()->drawer(
+                    amis()->Drawer()->title($title)->body($form)->size($dialogSize)
+                );
+            } else {
+                $button = amis()->DialogAction()->dialog(
+                    amis()->Dialog()->title($title)->body($form)->size($dialogSize)
+                );
+            }
         }
 
-        return $button->label(admin_trans('admin.create'))->icon('fa fa-add')->level('primary');
+        return $button->label($title)->icon('fa fa-add')->level('primary');
     }
 
     /**
      * 行编辑按钮
      *
-     * @param bool   $dialog
-     * @param string $dialogSize
+     * @param bool|string $dialog     是否弹窗, 弹窗: true|dialog, 抽屉: drawer,
+     * @param string      $dialogSize 弹窗大小, 默认: md, 可选值: xs | sm | md | lg | xl | full
+     * @param string      $title      弹窗标题 & 按钮文字, 默认: 编辑
      *
-     * @return \plugin\owladmin\app\renderer\DialogAction|\plugin\owladmin\app\renderer\LinkAction
+     * @return DialogAction|LinkAction
      */
-    protected function rowEditButton(bool $dialog = false, string $dialogSize = '')
+    protected function rowEditButton(bool|string $dialog = false, string $dialogSize = 'md', string $title = ''): LinkAction|DialogAction
     {
+        $title  = $title ?: admin_trans('admin.edit');
+        $button = amis()->LinkAction()->link($this->getEditPath());
+
         if ($dialog) {
             $form = $this->form(true)
                 ->api($this->getUpdatePath())
@@ -98,45 +119,60 @@ trait ElementTrait
                 ->redirect('')
                 ->onEvent([]);
 
-            $button = amis()->DialogAction()->dialog(
-                amis()->Dialog()->title(admin_trans('admin.edit'))->body($form)->size($dialogSize)
-            );
-        } else {
-            $button = amis()->LinkAction()->link($this->getEditPath());
+            if ($dialog === 'drawer') {
+                $button = amis()->DrawerAction()->drawer(
+                    amis()->Drawer()->title($title)->body($form)->size($dialogSize)
+                );
+            } else {
+                $button = amis()->DialogAction()->dialog(
+                    amis()->Dialog()->title($title)->body($form)->size($dialogSize)
+                );
+            }
         }
 
-        return $button->label(admin_trans('admin.edit'))->icon('fa-regular fa-pen-to-square')->level('link');
+        return $button->label($title)->icon('fa-regular fa-pen-to-square')->level('link');
     }
 
     /**
      * 行详情按钮
      *
-     * @param bool   $dialog
-     * @param string $dialogSize
+     * @param bool|string $dialog     是否弹窗, 弹窗: true|dialog, 抽屉: drawer
+     * @param string      $dialogSize 弹窗大小, 默认: md, 可选值: xs | sm | md | lg | xl | full
+     * @param string      $title      弹窗标题 & 按钮文字, 默认: 详情
      *
-     * @return \plugin\owladmin\app\renderer\DialogAction|\plugin\owladmin\app\renderer\LinkAction
+     * @return DialogAction|LinkAction
      */
-    protected function rowShowButton(bool $dialog = false, string $dialogSize = '')
+    protected function rowShowButton(bool|string $dialog = false, string $dialogSize = 'md', string $title = ''): LinkAction|DialogAction
     {
+        $title  = $title ?: admin_trans('admin.show');
+        $button = amis()->LinkAction()->link($this->getShowPath());
+
         if ($dialog) {
-            $button = amis()->DialogAction()->dialog(
-                amis()->Dialog()->title(admin_trans('admin.show'))->body($this->detail('$id'))->size($dialogSize)
-            );
-        } else {
-            $button = amis()->LinkAction()->link($this->getShowPath());
+            if ($dialog === 'drawer') {
+                $button = amis()->DrawerAction()->drawer(
+                    amis()->Drawer()->title($title)->body($this->detail('$id'))->size($dialogSize)
+                );
+            } else {
+                $button = amis()->DialogAction()->dialog(
+                    amis()->Dialog()->title($title)->body($this->detail('$id'))->size($dialogSize)
+                );
+            }
         }
 
-        return $button->label(admin_trans('admin.show'))->icon('fa-regular fa-eye')->level('link');
+        return $button->label($title)->icon('fa-regular fa-eye')->level('link');
     }
 
     /**
      * 行删除按钮
      *
+     * @param string $title
+     *
+     * @return DialogAction
      */
-    protected function rowDeleteButton()
+    protected function rowDeleteButton(string $title = ''): DialogAction
     {
         return amis()->DialogAction()
-            ->label(admin_trans('admin.delete'))
+            ->label($title ?: admin_trans('admin.delete'))
             ->icon('fa-regular fa-trash-can')
             ->level('link')
             ->dialog(
@@ -161,9 +197,9 @@ trait ElementTrait
      * @param bool   $dialog
      * @param string $dialogSize
      *
-     * @return \plugin\owladmin\app\renderer\Operation
+     * @return Operation
      */
-    protected function rowActions(bool|array $dialog = false, string $dialogSize = '')
+    protected function rowActions(bool|array $dialog = false, string $dialogSize = ''): Operation
     {
         if (is_array($dialog)) {
             return amis()->Operation()->label(admin_trans('admin.actions'))->buttons($dialog);
@@ -179,9 +215,9 @@ trait ElementTrait
     /**
      * 基础筛选器
      *
-     * @return \plugin\owladmin\app\renderer\Form
+     * @return Form
      */
-    protected function baseFilter()
+    protected function baseFilter(): Form
     {
         return amis()->Form()
             ->panelClassName('base-filter')
@@ -195,17 +231,17 @@ trait ElementTrait
     /**
      * 基础筛选器 - 条件构造器
      *
-     * @return \plugin\owladmin\app\renderer\ConditionBuilderControl
+     * @return ConditionBuilderControl
      */
-    protected function baseFilterConditionBuilder()
+    protected function baseFilterConditionBuilder(): ConditionBuilderControl
     {
         return amis()->ConditionBuilderControl('filter_condition_builder');
     }
 
     /**
-     * @return \plugin\owladmin\app\renderer\CRUDTable
+     * @return CRUDTable
      */
-    protected function baseCRUD()
+    protected function baseCRUD(): CRUDTable
     {
         $crud = amis()->CRUDTable()
             ->perPage(20)
@@ -230,7 +266,7 @@ trait ElementTrait
         return $crud;
     }
 
-    protected function baseHeaderToolBar()
+    protected function baseHeaderToolBar(): array
     {
         return [
             'bulkActions',
@@ -244,13 +280,13 @@ trait ElementTrait
      *
      * @param bool $back
      *
-     * @return \plugin\owladmin\app\renderer\Form
+     * @return Form
      */
-    protected function baseForm(bool $back = true)
+    protected function baseForm(bool $back = true): Form
     {
         $path = str_replace(Admin::config('admin.route.prefix'), '', request()->path());
 
-        $form = amis()->Form()->panelClassName('px-48 m:px-0')->title(' ')->mode('horizontal')->promptPageLeave();
+        $form = amis()->Form()->panelClassName('px-48 m:px-0')->title(' ')->mode('normal')->promptPageLeave();
 
         if ($back) {
             $form->onEvent([
@@ -270,9 +306,9 @@ trait ElementTrait
     }
 
     /**
-     * @return \plugin\owladmin\app\renderer\Form
+     * @return Form
      */
-    protected function baseDetail()
+    protected function baseDetail(): Form
     {
         return amis()->Form()
             ->panelClassName('px-48 m:px-0')
@@ -287,9 +323,9 @@ trait ElementTrait
      *
      * @param $crud
      *
-     * @return \plugin\owladmin\app\renderer\Page
+     * @return Page
      */
-    protected function baseList($crud)
+    protected function baseList($crud): Page
     {
         return amis()->Page()->className('m:overflow-auto pb-48')->body($crud);
     }
@@ -299,9 +335,9 @@ trait ElementTrait
      *
      * @param bool $disableSelectedItem
      *
-     * @return \plugin\owladmin\app\renderer\Service
+     * @return Service
      */
-    protected function exportAction($disableSelectedItem = false)
+    protected function exportAction(bool $disableSelectedItem = false): Service
     {
         // 获取主键名称
         $primaryKey = $this->service->primaryKey();
