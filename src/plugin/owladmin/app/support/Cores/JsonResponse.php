@@ -3,6 +3,7 @@
 namespace plugin\owladmin\app\support\Cores;
 
 use support\Response;
+use plugin\owladmin\app\support\SqlRecord;
 
 class JsonResponse
 {
@@ -51,7 +52,7 @@ class JsonResponse
     {
         if (config('app.debug')) {
             $this->additionalData['_debug'] = [
-                // 'sql' => sql_record(), // todo 获取sql
+                'sql' => SqlRecord::$sql,
             ];
         }
         return json(array_merge($this->additionalData, ['data' => $data])); // webman json()

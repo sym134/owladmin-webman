@@ -197,6 +197,7 @@ class Admin
     public static function middleware(): array
     {
         return [
+            \plugin\owladmin\app\middleware\SqlMonitor::class,
             \plugin\owladmin\app\middleware\ConnectionDatabase::class,
             \plugin\owladmin\app\middleware\ForceHttps::class,
             \plugin\owladmin\app\middleware\AutoSetLocale::class,
