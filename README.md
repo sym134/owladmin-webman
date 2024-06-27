@@ -78,6 +78,11 @@ DB_CONNECTION=mysql
     // ........
 ```
 
+## 依赖注入
+```shell
+composer require psr/container ^1.1.1 php-di/php-di ^6 doctrine/annotations ^1.14
+```
+
 ## 运行
 
 ```shell
