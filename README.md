@@ -10,6 +10,12 @@ owladmin-webman
 composer create-project workerman/webman
 cd webman
 ```
+
+## 依赖注入
+```shell
+composer require psr/container ^1.1.1 php-di/php-di ^6 doctrine/annotations ^1.14
+```
+
 ## 数据库配置文件位置为 config/database.php
 ```shell
 return [
@@ -78,9 +84,9 @@ DB_CONNECTION=mysql
     // ........
 ```
 
-## 依赖注入
+## 数据库安装
 ```shell
-composer require psr/container ^1.1.1 php-di/php-di ^6 doctrine/annotations ^1.14
+php webman migrate:run
 ```
 
 ## 运行
