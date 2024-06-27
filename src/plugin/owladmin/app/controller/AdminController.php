@@ -10,7 +10,6 @@ use plugin\owladmin\app\model\AdminUser;
 use plugin\owladmin\app\trait\ExportTrait;
 use plugin\owladmin\app\trait\UploadTrait;
 use plugin\owladmin\app\trait\ElementTrait;
-use plugin\owladmin\app\service\AdminService;
 use plugin\owladmin\app\trait\QueryPathTrait;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Container\ContainerExceptionInterface;

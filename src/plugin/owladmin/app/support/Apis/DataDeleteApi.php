@@ -2,7 +2,9 @@
 
 namespace plugin\owladmin\app\support\Apis;
 
+use support\Response;
 use plugin\owladmin\app\Admin;
+use plugin\owladmin\app\service\AdminService;
 
 /**
  * 删除数据
@@ -11,12 +13,12 @@ class DataDeleteApi extends AdminBaseApi
 {
     public string $method = 'delete';
 
-    public function getTitle()
+    public function getTitle(): string
     {
         return admin_trans('admin.api_templates.data_delete');
     }
 
-    public function handle()
+    public function handle(): Response
     {
         $result = $this->service()->delete(request()->input($this->getArgs('primary_key', 'ids')));
 
@@ -28,7 +30,7 @@ class DataDeleteApi extends AdminBaseApi
         return Admin::response()->fail(admin_trans('admin.failed_message', ['attribute' => admin_trans('admin.delete')]));
     }
 
-    public function argsSchema()
+    public function argsSchema(): array
     {
         return [
             amis()->SelectControl('model', admin_trans('admin.relationships.model'))
@@ -40,7 +42,7 @@ class DataDeleteApi extends AdminBaseApi
         ];
     }
 
-    protected function service()
+    protected function service(): AdminService
     {
         $service = $this->blankService();
 

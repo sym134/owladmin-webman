@@ -47,7 +47,6 @@ class Cache
 
     public function pull(string $key): ?string
     {
-        $key = $this->getKey($key);
         if (!$this->has($key)) {
             return null;
         }

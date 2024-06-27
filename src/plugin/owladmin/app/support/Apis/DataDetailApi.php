@@ -3,6 +3,7 @@
 namespace plugin\owladmin\app\support\Apis;
 
 use plugin\owladmin\app\Admin;
+use plugin\owladmin\app\service\AdminService;
 
 /**
  * 数据详情
@@ -11,19 +12,19 @@ class DataDetailApi extends AdminBaseApi
 {
     public string $method = 'get';
 
-    public function getTitle()
+    public function getTitle(): string
     {
         return admin_trans('admin.api_templates.data_detail');
     }
 
-    public function handle()
+    public function handle(): \support\Response
     {
         $data = $this->service()->getDetail(request()->input($this->getArgs('primary_key', 'id')));
 
         return Admin::response()->success($data);
     }
 
-    public function argsSchema()
+    public function argsSchema(): array
     {
         return [
             amis()->SelectControl('model', admin_trans('admin.relationships.model'))
@@ -35,7 +36,7 @@ class DataDetailApi extends AdminBaseApi
         ];
     }
 
-    protected function service()
+    protected function service(): AdminService
     {
         $service = $this->blankService();
 

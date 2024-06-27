@@ -24,7 +24,7 @@ abstract class AdminService
 
     protected string $modelName;
 
-    protected Request $request;
+    protected Request|null $request;
 
     public function __construct()
     {

@@ -4,7 +4,6 @@ namespace plugin\owladmin\app\controller\DevTools;
 
 use support\Response;
 use Illuminate\Support\Str;
-use plugin\owladmin\app\Admin;
 use plugin\owladmin\app\renderer\Form;
 use plugin\owladmin\app\renderer\Page;
 use plugin\owladmin\app\support\Cores\Api;

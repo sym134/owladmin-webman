@@ -2,7 +2,9 @@
 
 namespace plugin\owladmin\app\support\Apis;
 
+use support\Response;
 use plugin\owladmin\app\Admin;
+use plugin\owladmin\app\service\AdminService;
 
 /**
  * 数据新增
@@ -11,12 +13,12 @@ class DataCreateApi extends AdminBaseApi
 {
     public string $method = 'post';
 
-    public function getTitle()
+    public function getTitle(): string
     {
         return admin_trans('admin.api_templates.data_create');
     }
 
-    public function handle()
+    public function handle(): Response
     {
         $result = $this->service()->store(request()->all());
 
@@ -28,7 +30,7 @@ class DataCreateApi extends AdminBaseApi
         return Admin::response()->fail(admin_trans('admin.failed_message', ['attribute' => admin_trans('admin.create')]));
     }
 
-    public function argsSchema()
+    public function argsSchema(): array
     {
         return [
             amis()->SelectControl('model', admin_trans('admin.relationships.model'))
@@ -39,7 +41,7 @@ class DataCreateApi extends AdminBaseApi
         ];
     }
 
-    protected function service()
+    protected function service(): AdminService
     {
         $service = $this->blankService();
 

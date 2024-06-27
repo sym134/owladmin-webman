@@ -2,6 +2,7 @@
 
 namespace plugin\owladmin\app\support\Apis;
 
+use support\Response;
 use plugin\owladmin\app\Admin;
 use plugin\owladmin\app\service\AdminService;
 
@@ -12,12 +13,12 @@ class DataListApi extends AdminBaseApi
 {
     public string $method = 'get';
 
-    public function getTitle(): ?string
+    public function getTitle(): string
     {
         return admin_trans('admin.api_templates.data_list');
     }
 
-    public function handle()
+    public function handle(): Response
     {
         return Admin::response()->success($this->service()->list());
     }

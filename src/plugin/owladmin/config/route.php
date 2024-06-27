@@ -38,12 +38,12 @@ Route::group('/' . config('plugin.owladmin.admin.route.prefix'), function () {
     Route::get('/_iconify_search', [IndexController::class, 'iconifySearch']);
     Route::get('/page_schema', [IndexController::class, 'pageSchema']);
 
-    Route::any('upload_file', [IndexController::class, 'uploadFile']);
-    Route::any('upload_chunk_start', [IndexController::class, 'chunkUploadStart']);
-    Route::any('upload_chunk', [IndexController::class, 'chunkUpload']);
-    Route::any('upload_chunk_finish', [IndexController::class, 'chunkUploadFinish']);
-    Route::any('upload_rich', [IndexController::class, 'uploadRich']);
-    Route::any('upload_image', [IndexController::class, 'uploadImage']);
+    Route::any('/upload_file', [IndexController::class, 'uploadFile']);
+    Route::any('/upload_chunk_start', [IndexController::class, 'chunkUploadStart']);
+    Route::any('/upload_chunk', [IndexController::class, 'chunkUpload']);
+    Route::any('/upload_chunk_finish', [IndexController::class, 'chunkUploadFinish']);
+    Route::any('/upload_rich', [IndexController::class, 'uploadRich']);
+    Route::any('/upload_image', [IndexController::class, 'uploadImage']);
     Route::get('/user_setting', [AuthController::class, 'userSetting']);
     Route::put('user_setting', [AuthController::class, 'saveUserSetting']);
 

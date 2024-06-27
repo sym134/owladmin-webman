@@ -67,7 +67,7 @@ class AdminRelationshipService extends AdminService
 
     public function allModels(): array
     {
-        $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(app_path('model'))); // webman
+        $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(app_path('model'))); // webman todo 目前只有app，没有插件的model
         $phpFiles = new RegexIterator($iterator, '/^.+\.php$/i', RegexIterator::GET_MATCH);
 
         foreach ($phpFiles as $phpFile) {

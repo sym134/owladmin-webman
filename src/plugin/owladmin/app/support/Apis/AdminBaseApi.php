@@ -3,6 +3,9 @@
 namespace plugin\owladmin\app\support\Apis;
 
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Model;
+use plugin\owladmin\app\model\AdminApi;
+use Illuminate\Database\Eloquent\Builder;
 use plugin\owladmin\app\service\AdminService;
 use plugin\owladmin\app\service\AdminApiService;
 use Illuminate\Database\Eloquent\HigherOrderBuilderProxy;
@@ -14,7 +17,7 @@ abstract class AdminBaseApi implements AdminApiInterface
 
     public string $method = 'any';
 
-    public static $apiRecord;
+    public static Model|Builder|AdminApi|null $apiRecord;
 
     /**
      * 获取接口名称
@@ -31,7 +34,7 @@ abstract class AdminBaseApi implements AdminApiInterface
         return $this->method;
     }
 
-    public function getApiRecord(): \Illuminate\Database\Eloquent\Model|\plugin\owladmin\app\model\AdminApi|\Illuminate\Database\Eloquent\Builder|null
+    public function getApiRecord(): Model|AdminApi|Builder|null
     {
         if (!self::$apiRecord) {
             self::$apiRecord = AdminApiService::make()->getApiByTemplate(static::class);
