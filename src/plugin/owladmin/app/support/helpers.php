@@ -1,5 +1,7 @@
 <?php
 
+use plugin\owladmin\app\service\StorageService;
+
 if (!function_exists('admin_url')) {
     function admin_url($path = null, $needPrefix = false): string
     {
@@ -53,8 +55,7 @@ if (!function_exists('admin_resource_full_path')) {
         if (!$path) {
             return '';
         }
-        // todo 待处理
-        if (url()->isValidUrl($path) || mb_strpos($path, 'data:image') === 0) {
+        if (filter_var($path,FILTER_VALIDATE_URL) || mb_strpos($path, 'data:image') === 0) {
             $src = $path;
         } else if ($server) {
             $src = rtrim($server, '/') . '/' . ltrim($path, '/');
@@ -62,7 +63,7 @@ if (!function_exists('admin_resource_full_path')) {
             $disk = \plugin\owladmin\app\Admin::config('admin.upload.disk');
 
             if (config("filesystems.disks.{$disk}")) {
-                $src = \Illuminate\Support\Facades\Storage::disk($disk)->url($path);
+                $src = StorageService::disk()->url($path);
             } else {
                 $src = '';
             }
@@ -118,7 +119,7 @@ if (!function_exists('file_upload_handle')) {
      */
     function file_upload_handle(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
-        $storage = \Shopwwi\WebmanFilesystem\Facade\Storage::adapter(\plugin\owladmin\app\Admin::config('admin.upload.disk')); // webman
+        $storage = StorageService::disk(); // webman
 
         return \Illuminate\Database\Eloquent\Casts\Attribute::make(
             get: fn($value) => $value ? $storage->url($value) : '', // webman
@@ -135,7 +136,7 @@ if (!function_exists('file_upload_handle_multi')) {
      */
     function file_upload_handle_multi(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
-        $storage = \Illuminate\Support\Facades\Storage::disk(\plugin\owladmin\app\Admin::config('admin.upload.disk'));
+        $storage = StorageService::disk(); // webman
 
         return \Illuminate\Database\Eloquent\Casts\Attribute::make(
             get: function ($value) use ($storage) {

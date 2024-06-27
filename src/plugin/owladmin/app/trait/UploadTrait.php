@@ -2,12 +2,12 @@
 
 namespace plugin\owladmin\app\trait;
 
+use Throwable;
 use support\Response;
 use Illuminate\Support\Str;
 use plugin\owladmin\app\Admin;
-use Illuminate\Support\Facades\Storage;
+use plugin\owladmin\app\service\StorageService;
 
-// todo 部分功能不支持webman
 trait UploadTrait
 {
     /**
@@ -55,11 +55,11 @@ trait UploadTrait
     public function uploadRich(): Response
     {
         $fromWangEditor = false;
-        $file           = request()->file('file');
+        $file = request()->file('file');
 
         if (!$file) {
             $fromWangEditor = true;
-            $file           = request()->file('wangeditor-uploaded-image');
+            $file = request()->file('wangeditor-uploaded-image');
             if (!$file) {
                 $file = request()->file('wangeditor-uploaded-video');
             }
@@ -69,9 +69,14 @@ trait UploadTrait
             return $this->response()->additional(['errno' => 1])->fail(admin_trans('admin.upload_file_error'));
         }
 
-        $path = $file->store(Admin::config('admin.upload.directory.rich'), Admin::config('admin.upload.disk'));
+        $filesystem = StorageService::disk();
+        try {
+            $file_info = $filesystem->path(Admin::config('admin.upload.directory.rich'))->upload($file);
+        } catch (Throwable $e) {
+            return $this->response()->fail($e->getMessage());
+        }
 
-        $link = Storage::disk(Admin::config('admin.upload.disk'))->url($path);
+        $link = $filesystem->url($file_info->file_name);
 
         if ($fromWangEditor) {
             return $this->response()->additional(['errno' => 0])->success(['url' => $link]);
@@ -88,9 +93,13 @@ trait UploadTrait
             return $this->response()->fail(admin_trans('admin.upload_file_error'));
         }
 
-        $path = $file->store(Admin::config('admin.upload.directory.' . $type), Admin::config('admin.upload.disk'));
-
-        return $this->response()->success(['value' => $path]);
+        $filesystem = StorageService::disk();
+        try {
+            $file_info = $filesystem->path(Admin::config('admin.upload.directory.' . $type))->upload($file);
+        } catch (Throwable $e) {
+            return $this->response()->fail($e->getMessage());
+        }
+        return $this->response()->success(['value' => $file_info->file_url]);
     }
 
     public function chunkUploadStart(): Response
@@ -106,17 +115,20 @@ trait UploadTrait
 
     public function chunkUpload(): Response
     {
-        $uploadId   = request()->input('uploadId');
+        $uploadId = request()->input('uploadId');
         $partNumber = request()->input('partNumber');
-        $file       = request()->file('file');
+        $file = request()->file('file');
 
         $path = 'chunk/' . $uploadId;
 
-        $file->storeAs($path, $partNumber, 'public');
-
-        $eTag = md5(Storage::disk('public')->get($path . '/' . $partNumber));
-
-        return $this->response()->success(compact('eTag'));
+        $filesystem = StorageService::disk();
+        try {
+            $file_info = $filesystem->path($path)->reUpload($file,$partNumber);
+            $eTag = md5($file_info->file_name);
+            return $this->response()->success(compact('eTag'));
+        } catch (Throwable $e) {
+            return $this->response()->fail($e->getMessage());
+        }
     }
 
     public function chunkUploadFinish(): Response
@@ -124,10 +136,10 @@ trait UploadTrait
         $fileName = request()->file('filename');
         $partList = request()->input('partList');
         $uploadId = request()->input('uploadId');
-        $type     = request()->input('t');
+        $type = request()->input('t');
 
-        $ext      = pathinfo($fileName, PATHINFO_EXTENSION);
-        $path     = $type . '/' . $uploadId . '.' . $ext;
+        $ext = pathinfo($fileName, PATHINFO_EXTENSION);
+        $path = $type . '/' . $uploadId . '.' . $ext;
         $fullPath = base_path('public/' . $path);
 
         $dir = dirname($fullPath);
@@ -137,17 +149,17 @@ trait UploadTrait
 
         for ($i = 0; $i < count($partList); $i++) {
             $partNumber = $partList[$i]['partNumber'];
-            $eTag       = $partList[$i]['eTag'];
+            $eTag = $partList[$i]['eTag'];
 
             $partPath = 'chunk/' . $uploadId . '/' . $partNumber;
 
-            $partETag = md5(Storage::disk('public')->get($partPath));
+            $partETag = md5(StorageService::disk()->get($partPath));
 
             if ($eTag != $partETag) {
                 return $this->response()->fail('分片上传失败');
             }
 
-            file_put_contents($fullPath, Storage::disk('public')->get($partPath), FILE_APPEND);
+            file_put_contents($fullPath, StorageService::disk()->get($partPath), FILE_APPEND);
         }
 
         clearstatcache();

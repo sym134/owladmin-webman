@@ -2,9 +2,9 @@
 
 namespace plugin\owladmin\app\model;
 
-use support\Model;
 use plugin\owladmin\app\Admin;
 use Illuminate\Support\Collection;
+use plugin\owladmin\app\service\StorageService;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
@@ -27,10 +27,10 @@ class AdminUser extends BaseModel
 
     public function avatar(): Attribute
     {
-        $storage = \Shopwwi\WebmanFilesystem\Facade\Storage::adapter(Admin::config('admin.upload.disk')); // webman Storage::adapter
+        $storage = StorageService::disk(); // webman
 
         return Attribute::make(
-            get: fn($value) => $value ? admin_resource_full_path($value) : url(Admin::config('admin.default_avatar')),
+            get: fn($value) => $value ? $storage->url($value) : url(Admin::config('admin.default_avatar')),
             set: fn($value) => str_replace($storage->url(''), '', $value)
         );
     }
