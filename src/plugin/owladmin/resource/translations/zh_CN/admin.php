@@ -335,4 +335,19 @@ return [
         'data_delete' => '删除数据',
         'data_detail' => '获取详情',
     ],
+
+    'admin_attachments' => [
+        'storage_mode' => '存储模式',
+        'origin_name'  => '原文件名',
+        'new_name'     => '新文件名',
+        'hash'         => '文件hash',
+        'file_type'    => '资源类型',
+        'mime_type'    => '资源类型',
+        'storage_path' => '存储目录',
+        'size_byte'    => '字节数',
+        'file_size'    => '文件大小',
+        'url'          => 'url地址',
+        'remark'       => '备注',
+        'created_by'   => '创建者',
+    ],
 ];

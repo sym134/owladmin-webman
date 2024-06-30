@@ -139,6 +139,25 @@ return new class extends Migration {
             $table->longText('args')->comment('接口参数')->nullable();
             $table->timestamps();
         });
+
+        $this->schema()->create('attachments', function (Blueprint $table) {
+            $table->comment('附件管理');
+            $table->increments('id');
+            $table->enum('storage_mode',['local','qiniu','aliyun','qcloud'])->comment('存储模式');
+            $table->string('origin_name')->nullable()->comment('原文件名');
+            $table->string('new_name')->nullable()->comment('新文件名');
+            $table->string('hash')->nullable()->comment('文件hash');
+            $table->enum('file_type',['image','video','audio','file'])->comment('资源类型');
+            $table->string('mime_type')->comment('资源类型');
+            $table->string('storage_path')->nullable()->comment('存储目录');
+            $table->bigInteger('size_byte')->comment('字节数');
+            $table->string('file_size')->nullable()->comment('文件大小');
+            $table->string('url')->nullable()->comment('url地址');
+            $table->string('remark')->nullable()->comment('备注');
+            $table->tinyInteger('created_by')->comment('创建者');
+            $table->timestamps();
+            $table->softDeletes();
+        });
     }
 
     /**
@@ -161,5 +180,6 @@ return new class extends Migration {
         $this->schema()->dropIfExists('admin_pages');
         $this->schema()->dropIfExists('admin_relationships');
         $this->schema()->dropIfExists('admin_apis');
+        $this->schema()->dropIfExists('attachments');
     }
 };

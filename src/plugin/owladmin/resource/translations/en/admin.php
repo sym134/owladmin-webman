@@ -335,4 +335,19 @@ Backup important data before performing operations!!!<br>
         'data_delete' => 'Delete',
         'data_detail' => 'Get Detail',
     ],
+
+    'admin_attachments' => [
+        'storage_mode' => 'Storage Mode',
+        'origin_name'  => 'Origin Name',
+        'new_name'     => 'New Name',
+        'hash'         => 'hash',
+        'file_type'    => 'File Type',
+        'mime_type'    => 'Mime Type',
+        'storage_path' => 'Storage Path',
+        'size_byte'    => 'Size Byte',
+        'file_size'    => 'File Size',
+        'url'          => 'URL',
+        'remark'       => 'Remark',
+        'created_by'   => 'Created By',
+    ],
 ];

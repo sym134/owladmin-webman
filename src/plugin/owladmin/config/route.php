@@ -9,10 +9,13 @@ use plugin\owladmin\app\controller\AdminRoleController;
 use plugin\owladmin\app\controller\AdminUserController;
 use plugin\owladmin\app\controller\AdminMenuController;
 use plugin\owladmin\app\controller\DevTools\ApiController;
+use plugin\owladmin\app\controller\system\CacheController;
+use plugin\owladmin\app\controller\system\StorageController;
 use plugin\owladmin\app\controller\DevTools\PagesController;
 use plugin\owladmin\app\controller\DevTools\EditorController;
 use plugin\owladmin\app\controller\AdminPermissionController;
 use plugin\owladmin\app\controller\DevTools\PluginController;
+use plugin\owladmin\app\controller\system\AttachmentController;
 use plugin\owladmin\app\controller\DevTools\ExtensionController;
 use plugin\owladmin\app\controller\DevTools\RelationshipController;
 use plugin\owladmin\app\controller\DevTools\CodeGeneratorController;
@@ -53,6 +56,7 @@ Route::group('/' . config('plugin.owladmin.admin.route.prefix'), function () {
         Route::get('/', [AdminUserController::class, 'index']);
 
         Route::resource('/admin_users', AdminUserController::class);
+        Route::resource('/cache', CacheController::class);
         Route::post('/admin_menus/save_order', [AdminMenuController::class, 'saveOrder']);
         Route::resource('/admin_menus', AdminMenuController::class);
         Route::resource('/admin_roles', AdminRoleController::class);
@@ -60,6 +64,10 @@ Route::group('/' . config('plugin.owladmin.admin.route.prefix'), function () {
 
         Route::post('/admin_role_save_permissions', [AdminRoleController::class, 'savePermissions']);
         Route::post('/_admin_permissions_auto_generate', [AdminPermissionController::class, 'autoGenerate']);
+
+        Route::resource('/storage', StorageController::class);
+        Route::resource('/attachment', AttachmentController::class);
+
     });
 
     if (config('plugin.owladmin.admin.show_development_tools')) {
