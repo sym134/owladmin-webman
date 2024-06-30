@@ -58,12 +58,12 @@ class Permission
     /**
      * 权限拦截
      *
-     * @param $request
-     * @param $args
+     * @param Request          $request
+     * @param                  $args
      *
      * @return bool
      */
-    public function permissionIntercept(\support\Request $request, $args): bool
+    public function permissionIntercept(Request $request, $args): bool
     {
         if (Admin::config('admin.auth.permission') === false) {
             return false;
