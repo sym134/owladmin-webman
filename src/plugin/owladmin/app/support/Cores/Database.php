@@ -252,9 +252,10 @@ class Database
         $adminPermission->insert([
             $data(['name' => '首页', 'slug' => 'home', 'http_path' => ['/home*'], "parent_id" => 0]),
             $data(['name' => '系统', 'slug' => 'system', 'http_path' => '', "parent_id" => 0]),
-            $data(['name' => '管理员', 'slug' => 'admin_users', 'http_path' => ["/admin_users*"], "parent_id" => 2]),
-            $data(['name' => '角色', 'slug' => 'roles', 'http_path' => ["/roles*"], "parent_id" => 2]),
-            $data(['name' => '权限', 'slug' => 'permissions', 'http_path' => ["/permissions*"], "parent_id" => 2]),
+            $data(['name' => '权限', 'slug' => 'permission_management', 'http_path' => '', "parent_id" => 0]),
+            $data(['name' => '管理员', 'slug' => 'admin_users', 'http_path' => ["/admin_users*"], "parent_id" => 3]),
+            $data(['name' => '角色', 'slug' => 'roles', 'http_path' => ["/roles*"], "parent_id" => 3]),
+            $data(['name' => '权限', 'slug' => 'permissions', 'http_path' => ["/permissions*"], "parent_id" => 3]),
         ]);
 
         // 角色 - 权限绑定
@@ -285,28 +286,35 @@ class Database
                 'is_home'   => 0,
             ]),
             $data([
-                'parent_id' => 2,
+                'parent_id' => 0,
+                'title'     => 'permission_management',
+                'icon'      => 'akar-icons:lock-on',
+                'url'       => '/permission_management',
+                'is_home'   => 0,
+            ]),
+            $data([
+                'parent_id' => 3,
                 'title'     => 'admin_users',
                 'icon'      => 'ph:user-gear',
                 'url'       => '/system/admin_users',
                 'is_home'   => 0,
             ]),
             $data([
-                'parent_id' => 2,
+                'parent_id' => 3,
                 'title'     => 'admin_roles',
                 'icon'      => 'carbon:user-role',
                 'url'       => '/system/admin_roles',
                 'is_home'   => 0,
             ]),
             $data([
-                'parent_id' => 2,
+                'parent_id' => 3,
                 'title'     => 'admin_permission',
                 'icon'      => 'fluent-mdl2:permissions',
                 'url'       => '/system/admin_permissions',
                 'is_home'   => 0,
             ]),
             $data([
-                'parent_id' => 2,
+                'parent_id' => 3,
                 'title'     => 'admin_menu',
                 'icon'      => 'ant-design:menu-unfold-outlined',
                 'url'       => '/system/admin_menus',
@@ -314,9 +322,16 @@ class Database
             ]),
             $data([
                 'parent_id' => 2,
-                'title'     => 'admin_setting',
+                'title'     => 'admin_storage',
                 'icon'      => 'akar-icons:settings-horizontal',
-                'url'       => '/system/settings',
+                'url'       => '/system/storage',
+                'is_home'   => 0,
+            ]),
+            $data([
+                'parent_id' => 2,
+                'title'     => 'attachment',
+                'icon'      => 'grommet-icons:attachment',
+                'url'       => '/system/attachment',
                 'is_home'   => 0,
             ]),
         ]);
