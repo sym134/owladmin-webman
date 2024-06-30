@@ -249,7 +249,7 @@ if (!function_exists('owl_admin_path')) {
     {
         $path = ltrim($path, '/');
 
-        return __DIR__ . '/owladmin/' . $path;
+        return base_path('/plugin/owladmin/' . $path);
     }
 }
 

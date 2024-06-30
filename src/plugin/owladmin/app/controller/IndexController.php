@@ -78,7 +78,7 @@ class IndexController extends AdminController
     {
         $query = request()->input('query', 'home');
 
-        $icons = file_get_contents(owl_admin_path('/Support/iconify.json'));
+        $icons = file_get_contents(owl_admin_path('/app/support/iconify.json'));
         $icons = json_decode($icons, true);
 
         $items = [];

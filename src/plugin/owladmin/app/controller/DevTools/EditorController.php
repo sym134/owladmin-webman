@@ -24,7 +24,7 @@ class EditorController extends AdminController
 
         if ($json['type'] ?? null) {
             if (in_array($json['type'], $mapKeys)) {
-                $className = str_replace('plugin\\owladmin\\renderer\\', '', $map[$json['type']]);
+                $className = str_replace('plugin\\owladmin\\app\\renderer\\', '', $map[$json['type']]);
                 $code      .= sprintf('amis()->%s()', $className);
             } else {
                 // 没找到对应的组件

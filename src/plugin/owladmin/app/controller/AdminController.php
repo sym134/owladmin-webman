@@ -12,6 +12,7 @@ use plugin\owladmin\app\trait\UploadTrait;
 use plugin\owladmin\app\trait\ElementTrait;
 use plugin\owladmin\app\trait\QueryPathTrait;
 use Psr\Container\NotFoundExceptionInterface;
+use plugin\owladmin\app\service\AdminService;
 use Psr\Container\ContainerExceptionInterface;
 use plugin\owladmin\app\trait\CheckActionTrait;
 use Illuminate\Contracts\Auth\Authenticatable;
@@ -25,7 +26,7 @@ abstract class AdminController
     use QueryPathTrait;
     use CheckActionTrait;
 
-    protected $service;
+    protected AdminService $service;
 
     /** @var string $queryPath 路径 */
     protected string $queryPath;

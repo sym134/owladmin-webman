@@ -108,9 +108,9 @@ class AdminCodeGeneratorService extends AdminService
 
         $namespace->pop();
 
-        if ($app && !Admin::currentModule()) {
-            $namespace->pop();
-        }
+        // if ($app && !Admin::currentModule()) {
+        //     $namespace->pop();
+        // }
 
         return $namespace->push($name)->implode('/') . '/';
     }
@@ -118,7 +118,7 @@ class AdminCodeGeneratorService extends AdminService
     public function getDefaultPath(): array
     {
         return [
-            'label' => Admin::currentModule() ?: admin_trans('admin.code_generators.save_path_dir'),
+            'label' => admin_trans('admin.code_generators.save_path_dir'),
             'value' => [
                 'directory'       => 'app',
                 'controller_path' => $this->getNamespace('controller'),
