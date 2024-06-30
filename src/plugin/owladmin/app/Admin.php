@@ -7,7 +7,6 @@ use Shopwwi\WebmanAuth\Facade\Auth;
 use plugin\owladmin\app\support\Context;
 use plugin\owladmin\app\trait\AssetsTrait;
 use plugin\owladmin\app\support\Cores\Menu;
-use plugin\owladmin\app\support\Cores\Module;
 use plugin\owladmin\app\service\AdminSettingService;
 use plugin\owladmin\app\support\Cores\Permission;
 use plugin\owladmin\app\support\Cores\JsonResponse;
@@ -125,26 +124,6 @@ class Admin
         return self::config('admin.models.admin_user', AdminUser::class);
     }
 
-    /**
-     * @return Module
-     */
-    public static function module(): Module
-    {
-        return appw('admin.module');
-    }
-
-    /**
-     * 当前模块
-     *
-     * @param bool $lower
-     *
-     * @return mixed|string|null
-     */
-    public static function currentModule(bool $lower = false): mixed
-    {
-        return Module::current($lower);
-    }
-
     public static function config($key, $default = '')
     {
         $key = 'plugin.owladmin.' . $key; // webman
@@ -197,7 +176,6 @@ class Admin
     public static function middleware(): array
     {
         return [
-            \plugin\owladmin\app\middleware\SqlMonitor::class,
             \plugin\owladmin\app\middleware\ConnectionDatabase::class,
             \plugin\owladmin\app\middleware\ForceHttps::class,
             \plugin\owladmin\app\middleware\AutoSetLocale::class,
