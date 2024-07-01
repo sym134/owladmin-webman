@@ -553,10 +553,7 @@ class StorageService
 
     public static function disk(string $name = ''): StorageService
     {
-        // todo 数据库查询
         $config = settings()->get('storage');
-        // var_dump($config);
-        // die;
         $name = $config['engine'];
         $config = [
             'default'   => $config['engine'] ?? 'local',
