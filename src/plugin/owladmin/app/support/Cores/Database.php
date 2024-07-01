@@ -3,8 +3,12 @@
 namespace plugin\owladmin\app\support\Cores;
 
 
-use support\Db as DB; // webman
-use yzh52521\hash\Hash; // webman
+use support\Db as DB;
+
+// webman
+use yzh52521\hash\Hash;
+
+// webman
 use Illuminate\Database\Schema\Blueprint;
 
 class Database
@@ -220,10 +224,10 @@ class Database
             return array_merge($data, ['created_at' => $now, 'updated_at' => $now]);
         };
 
-        $adminUser       = DB::table($this->tableName('admin_users'));
-        $adminMenu       = DB::table($this->tableName('admin_menus'));
+        $adminUser = DB::table($this->tableName('admin_users'));
+        $adminMenu = DB::table($this->tableName('admin_menus'));
         $adminPermission = DB::table($this->tableName('admin_permissions'));
-        $adminRole       = DB::table($this->tableName('admin_roles'));
+        $adminRole = DB::table($this->tableName('admin_roles'));
 
         // 创建初始用户
         $adminUser->truncate();
@@ -292,6 +296,38 @@ class Database
                 'url'       => '/permission_management',
                 'is_home'   => 0,
             ]),
+            // 监控
+            $data([
+                'parent_id' => 0,
+                'title'     => 'admin_monitor',
+                'icon'      => 'eos-icons:monitoring',
+                'url'       => '/admin_monitor',
+                'is_home'   => 0,
+            ]),
+            // 日志监控
+            $data([
+                'parent_id' => 4,
+                'title'     => 'admin_log_monitoring',
+                'icon'      => 'eos-icons:monitoring',
+                'url'       => '/admin_log_monitoring',
+                'is_home'   => 0,
+            ]),
+            // 登陆日志
+            $data([
+                'parent_id' => 5,
+                'title'     => 'admin_login_log',
+                'icon'      => 'basil:login-outline',
+                'url'       => '/log_monitoring/admin_login_log',
+                'is_home'   => 0,
+            ]),
+            // 操作日志
+            $data([
+                'parent_id' => 5,
+                'title'     => 'admin_operation_log',
+                'icon'      => 'carbon:cloud-logging',
+                'url'       => '/log_monitoring/admin_operation_log',
+                'is_home'   => 0,
+            ]),
             $data([
                 'parent_id' => 3,
                 'title'     => 'admin_users',
@@ -340,7 +376,7 @@ class Database
         DB::table($this->tableName('admin_permission_menu'))->truncate();
         $menus = $adminMenu->get();
         foreach ($menus as $menu) {
-            $_list   = [];
+            $_list = [];
             $_list[] = $data(['permission_id' => $menu->id, 'menu_id' => $menu->id]);
 
             if ($menu->parent_id != 0) {
@@ -358,7 +394,7 @@ class Database
     {
         try {
             return collect(json_decode(json_encode(Db::schema()->getAllTables()), true)) // webman
-                ->map(fn($i) => config('database.default') == 'sqlite' ? $i['name'] : array_shift($i))
+            ->map(fn($i) => config('database.default') == 'sqlite' ? $i['name'] : array_shift($i))
                 ->toArray();
         } catch (\Throwable $e) {
         }

@@ -17,8 +17,10 @@ use plugin\owladmin\app\controller\AdminPermissionController;
 use plugin\owladmin\app\controller\DevTools\PluginController;
 use plugin\owladmin\app\controller\system\AttachmentController;
 use plugin\owladmin\app\controller\DevTools\ExtensionController;
+use plugin\owladmin\app\controller\monitor\AdminLoginLogController;
 use plugin\owladmin\app\controller\DevTools\RelationshipController;
 use plugin\owladmin\app\controller\DevTools\CodeGeneratorController;
+use plugin\owladmin\app\controller\monitor\AdminOperationLogController;
 
 Route::get('/admin1', [plugin\owladmin\app\controller\IndexController::class, 'index']);
 
@@ -67,8 +69,15 @@ Route::group('/' . config('plugin.owladmin.admin.route.prefix'), function () {
 
         Route::resource('/storage', StorageController::class);
         Route::resource('/attachment', AttachmentController::class);
-
     });
+
+    Route::group('/',function (){
+        // 登录日志
+        Route::resource('/log_monitoring/admin_login_log', AdminLoginLogController::class);
+        Route::resource('/log_monitoring/operation_log', AdminOperationLogController::class);
+    });
+
+
 
     if (config('plugin.owladmin.admin.show_development_tools')) {
         Route::group('/dev_tools', function () {

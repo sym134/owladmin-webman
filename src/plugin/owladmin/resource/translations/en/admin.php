@@ -336,7 +336,7 @@ Backup important data before performing operations!!!<br>
         'data_detail' => 'Get Detail',
     ],
 
-    'admin_attachments' => [
+    'admin_attachments'   => [
         'storage_mode' => 'Storage Mode',
         'origin_name'  => 'Origin Name',
         'new_name'     => 'New Name',
@@ -347,6 +347,18 @@ Backup important data before performing operations!!!<br>
         'size_byte'    => 'Size Byte',
         'file_size'    => 'File Size',
         'url'          => 'URL',
+        'remark'       => 'Remark',
+        'created_by'   => 'Created By',
+    ],
+    'admin_operation_log' => [
+        'username'     => 'Username',
+        'app'          => 'Application Name',
+        'method'       => 'Request Method',
+        'router'       => 'Request Route',
+        'service_name' => 'Service Name',
+        'ip'           => 'IP',
+        'ip_location'  => 'IP Location',
+        'request_data' => 'Request Data',
         'remark'       => 'Remark',
         'created_by'   => 'Created By',
     ],

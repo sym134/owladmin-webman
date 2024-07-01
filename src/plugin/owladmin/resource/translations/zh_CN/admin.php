@@ -350,4 +350,17 @@ return [
         'remark'       => '备注',
         'created_by'   => '创建者',
     ],
+
+    'admin_operation_log' => [
+        'username'     => '用户名',
+        'app'          => '应用名称',
+        'method'       => '请求方式',
+        'router'       => '请求路由',
+        'service_name' => '业务名称',
+        'ip'           => 'IP',
+        'ip_location'  => 'IP所属地',
+        'request_data' => '请求数据',
+        'remark'       => '备注',
+        'created_by'   => '创建者',
+    ],
 ];

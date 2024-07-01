@@ -158,6 +158,38 @@ return new class extends Migration {
             $table->timestamps();
             $table->softDeletes();
         });
+
+        $this->schema()->create('admin_operation_log', function (Blueprint $table) {
+            $table->comment('操作日志');
+            $table->increments('id');
+            $table->string('username', 20)->nullable()->comment('用户名');
+            $table->string('app', 50)->nullable()->comment('应用名称');
+            $table->string('method')->nullable()->comment('请求方式');
+            $table->string('router')->nullable()->comment('请求路由');
+            $table->string('service_name')->nullable()->comment('业务名称');
+            $table->string('ip', 45)->nullable()->comment('请求IP地址');
+            $table->string('ip_location')->nullable()->comment('IP所属地');
+            $table->text('request_data')->nullable()->comment('请求数据');
+            $table->string('remark')->nullable()->comment('备注');
+            $table->bigInteger('created_by')->index()->comment('创建者');
+            $table->timestamps();
+            $table->softDeletes();
+        });
+
+        $this->schema()->create('admin_login_log', function (Blueprint $table) {
+            $table->comment('登录日志');
+            $table->increments('id');
+            $table->string('username')->nullable()->comment('用户名');
+            $table->string('ip')->nullable()->comment('登录IP地址');
+            $table->string('ip_location')->nullable()->comment('IP所属地');
+            $table->string('os', 50)->nullable()->comment('操作系统');
+            $table->string('browser', 50)->nullable()->comment('浏览器');
+            $table->unsignedSmallInteger('status')->default(new \Illuminate\Database\Query\Expression('1'))->comment('登录状态');
+            $table->string('message', 50)->nullable()->comment('提示消息');
+            $table->dateTime('login_time')->nullable()->comment('登录时间');
+            $table->string('remark')->nullable()->comment('备注');
+            $table->timestamps();
+        });
     }
 
     /**
@@ -181,5 +213,8 @@ return new class extends Migration {
         $this->schema()->dropIfExists('admin_relationships');
         $this->schema()->dropIfExists('admin_apis');
         $this->schema()->dropIfExists('attachments');
+        $this->schema()->dropIfExists('admin_operation_log');
+        $this->schema()->dropIfExists('admin_login_log');
+
     }
 };
