@@ -89,6 +89,11 @@ DB_CONNECTION=mysql
 php webman migrate:run
 ```
 
+## 安装数据
+```shell
+php webman admin:install
+```
+
 ## 运行
 
 ```shell
