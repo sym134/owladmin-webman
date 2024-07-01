@@ -2,6 +2,7 @@
 
 namespace plugin\owladmin\app\model\monitor;
 
+use Illuminate\Database\Eloquent\SoftDeletes;
 use plugin\owladmin\app\model\BaseModel as Model;
 
 /**
@@ -9,6 +10,11 @@ use plugin\owladmin\app\model\BaseModel as Model;
  */
 class AdminLoginLog extends Model
 {
-
-	protected $table = 'admin_login_log';
+    use SoftDeletes;
+    const STATUS = [
+        1 => '登陆成功',
+        2 => '登陆失败',
+        3 => '用户未启用',
+    ];
+    protected $table = 'admin_login_log';
 }
