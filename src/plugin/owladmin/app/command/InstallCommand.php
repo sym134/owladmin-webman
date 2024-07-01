@@ -51,6 +51,9 @@ class InstallCommand extends BaseCommand
 
         if (Admin::adminUserModel()::query()->count() == 0) {
             Database::make()->fillInitialData();
+            $this->io->success('Database installed successfully.');
+        }else{
+            $this->io->warning('Database already installed.');
         }
     }
 

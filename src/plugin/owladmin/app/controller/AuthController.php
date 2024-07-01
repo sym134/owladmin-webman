@@ -20,7 +20,7 @@ class AuthController extends AdminController
     public function login(Request $request)
     {
         if (Admin::config('admin.auth.login_captcha')) {
-            if (!$request->has('captcha')) {
+            if (!$request->post('captcha')) {
                 return $this->response()->fail(admin_trans('admin.required', ['attribute' => admin_trans('admin.captcha')]));
             }
             if (strtolower(cache()->pull($request->post('sys_captcha'))) != strtolower($request->post('captcha'))) { // webman $request->post
@@ -45,7 +45,7 @@ class AuthController extends AdminController
             if ($user && Hash::check($request->post('password'), $user->password)) {
                 if (!$user->enabled) {
                     // 登录事件
-                    Event::emit('user.login', [$user->name, $user->id, 0, '用户未启用']);
+                    Event::emit('user.login', ['username'=>$user->name, 'status'=>$user->id, 3, 'message'=>'用户未启用']);
                     return $this->response()->fail(admin_trans('admin.user_disabled'));
                 }
 
@@ -54,12 +54,12 @@ class AuthController extends AdminController
                 $token = $this->guard()->login($user)->access_token;
 
                 // 登录事件
-                Event::emit('user.login', [$user->name, $user->id, 1, '登陆成功']);
+                Event::emit('user.login', ['username'=>$user->name, 'status'=>$user->id, 1, 'message'=>'登陆成功']);
                 return $this->response()->success(compact('token'), admin_trans('admin.login_successful'));
             }
 
             // 登录事件
-            Event::emit('user.login', [$user->name, $user->id, 0, '登陆失败']);
+            Event::emit('user.login', ['username'=>$user->name, 'status'=>$user->id, 2, 'message'=>'登陆失败']);
             abort(400, admin_trans('admin.login_failed'));
         } catch (\Exception $e) {
             return $this->response()->fail($e->getMessage());
