@@ -5,6 +5,7 @@ namespace plugin\owladmin\app\controller;
 use support\Request;
 use support\Response;
 use yzh52521\hash\Hash;
+use Webman\Event\Event;
 use plugin\owladmin\app\Admin;
 use Illuminate\Http\JsonResponse;
 use plugin\owladmin\app\renderer\Page;
@@ -43,6 +44,8 @@ class AuthController extends AdminController
 
             if ($user && Hash::check($request->post('password'), $user->password)) {
                 if (!$user->enabled) {
+                    // 登录事件
+                    Event::emit('user.login', [$user->name, $user->id, 0, '用户未启用']);
                     return $this->response()->fail(admin_trans('admin.user_disabled'));
                 }
 
@@ -50,9 +53,13 @@ class AuthController extends AdminController
                 // $prefix = $module ? $module . '.' : ''; // webman
                 $token = $this->guard()->login($user)->access_token;
 
+                // 登录事件
+                Event::emit('user.login', [$user->name, $user->id, 1, '登陆成功']);
                 return $this->response()->success(compact('token'), admin_trans('admin.login_successful'));
             }
 
+            // 登录事件
+            Event::emit('user.login', [$user->name, $user->id, 0, '登陆失败']);
             abort(400, admin_trans('admin.login_failed'));
         } catch (\Exception $e) {
             return $this->response()->fail($e->getMessage());
@@ -186,7 +193,7 @@ JS,
      *
      * @return Response
      */
-    public function reloadCaptcha():Response
+    public function reloadCaptcha(): Response
     {
         $captcha = new Captcha();
 

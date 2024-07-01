@@ -39,12 +39,12 @@ class Permission
      *
      * @param $request
      *
-     * @return bool
+     * @return array
      */
-    public function authIntercept($request): bool
+    public function authIntercept($request): array
     {
         if (!Admin::config('admin.auth.enable')) {
-            return false;
+            return [false, null];
         }
 
         $excepted = collect(Admin::config('admin.auth.except', []))
@@ -52,7 +52,8 @@ class Permission
             ->map(fn($path) => $this->pathFormatting($path))
             // webman
             ->contains(fn($except) => collect($except == '/' ? $except : trim($except, '/'))->contains(fn($pattern) => Str::is($pattern, trim($request->path(), '/'))));
-        return !$excepted && empty(Admin::guard()->user());
+        $user = Admin::guard()->user();
+        return [!$excepted && empty($user), $user];
     }
 
     /**
@@ -83,7 +84,7 @@ class Permission
             return false;
         }
 
-        $user = Admin::user();
+        $user = $request->user;
 
         if (!empty($args) || $this->checkRoutePermission($request) || $user?->isAdministrator()) {
             return false;
