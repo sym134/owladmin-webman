@@ -256,10 +256,18 @@ class Database
         $adminPermission->insert([
             $data(['name' => '首页', 'slug' => 'home', 'http_path' => ['/home*'], "parent_id" => 0]),
             $data(['name' => '系统', 'slug' => 'system', 'http_path' => '', "parent_id" => 0]),
-            $data(['name' => '权限', 'slug' => 'permission_management', 'http_path' => '', "parent_id" => 0]),
+            $data(['name' => '权限管理', 'slug' => 'admin_permission_management', 'http_path' => '', "parent_id" => 0]),
+            $data(['name' => '监控', 'slug' => 'admin_monitor', 'http_path' => '', "parent_id" => 0]),
+            $data(['name' => '监控日志', 'slug' => 'admin_log_monitoring', 'http_path' => '', "parent_id" => 4]),
+
             $data(['name' => '管理员', 'slug' => 'admin_users', 'http_path' => ["/admin_users*"], "parent_id" => 3]),
             $data(['name' => '角色', 'slug' => 'roles', 'http_path' => ["/roles*"], "parent_id" => 3]),
             $data(['name' => '权限', 'slug' => 'permissions', 'http_path' => ["/permissions*"], "parent_id" => 3]),
+            $data(['name' => '菜单', 'slug' => 'menus', 'http_path' => ["/menus*"], "parent_id" => 3]),
+
+            $data(['name' => '操作日志', 'slug' => 'admin_operation_log', 'http_path' => ["/log_monitoring/admin_operation_log*"], "parent_id" => 5]),
+            $data(['name' => '登陆日志', 'slug' => 'admin_login_log', 'http_path' => ["/log_monitoring/admin_login_log*"], "parent_id" => 5]),
+
         ]);
 
         // 角色 - 权限绑定
@@ -291,9 +299,9 @@ class Database
             ]),
             $data([
                 'parent_id' => 0,
-                'title'     => 'permission_management',
+                'title'     => 'admin_permission_management',
                 'icon'      => 'akar-icons:lock-on',
-                'url'       => '/permission_management',
+                'url'       => '/admin_permission_management',
                 'is_home'   => 0,
             ]),
             // 监控
@@ -388,6 +396,18 @@ class Database
 
         // 默认中文
         settings()->set('admin_locale', 'zh_CN');
+
+        // 默认存储设置
+        settings()->set('storage', [
+            "upload_size" => 5242880,
+            "file_type"   => "txt,doc,docx,xls,xlsx,ppt,pptx,rar,zip,7z,gz,pdf,wps,md",
+            "image_type"  => "jpg,jpeg,png,gif,svg,bmp",
+            "engine"      => "local",
+            "local"       => [
+                "domain" => "http://0.0.0.0:8787",
+                "path"   => "public",
+            ],
+        ]);
     }
 
     public static function getTables(): array

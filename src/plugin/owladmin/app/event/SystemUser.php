@@ -48,7 +48,7 @@ class SystemUser
         $data['service_name'] = self::getServiceName();
         $data['app'] = $module;
         $data['ip'] = $ip;
-        // $data['ip_location'] = self::getIpLocation($ip);
+        $data['ip_location'] = self::getIpLocation($ip);
         $data['request_data'] = $this->filterParams(request()->all());
         AdminOperationLogService::make()->store($data);
         return true;

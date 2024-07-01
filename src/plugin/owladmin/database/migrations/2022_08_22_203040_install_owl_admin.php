@@ -172,7 +172,7 @@ return new class extends Migration {
             $table->text('request_data')->nullable()->comment('请求数据');
             $table->string('remark')->nullable()->comment('备注');
             $table->bigInteger('created_by')->index()->comment('创建者');
-            $table->timestamps();
+            $table->dateTime('created_at')->nullable();
             $table->softDeletes();
         });
 
@@ -188,7 +188,8 @@ return new class extends Migration {
             $table->string('message', 50)->nullable()->comment('提示消息');
             $table->dateTime('login_time')->nullable()->comment('登录时间');
             $table->string('remark')->nullable()->comment('备注');
-            $table->timestamps();
+            $table->dateTime('created_at')->nullable();
+            $table->softDeletes();
         });
     }
 

@@ -71,10 +71,10 @@ Route::group('/' . config('plugin.owladmin.admin.route.prefix'), function () {
         Route::resource('/attachment', AttachmentController::class);
     });
 
-    Route::group('/',function (){
+    Route::group('/log_monitoring',function (){
         // 登录日志
-        Route::resource('/log_monitoring/admin_login_log', AdminLoginLogController::class);
-        Route::resource('/log_monitoring/operation_log', AdminOperationLogController::class);
+        Route::resource('/admin_login_log', AdminLoginLogController::class);
+        Route::resource('/admin_operation_log', AdminOperationLogController::class);
     });
 
 
