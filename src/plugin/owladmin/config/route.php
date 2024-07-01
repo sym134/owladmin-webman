@@ -50,7 +50,7 @@ Route::group('/' . config('plugin.owladmin.admin.route.prefix'), function () {
     Route::any('/upload_rich', [IndexController::class, 'uploadRich']);
     Route::any('/upload_image', [IndexController::class, 'uploadImage']);
     Route::get('/user_setting', [AuthController::class, 'userSetting']);
-    Route::put('user_setting', [AuthController::class, 'saveUserSetting']);
+    Route::put('/user_setting', [AuthController::class, 'saveUserSetting']);
 
     Route::resource('/dashboard', HomeController::class);
 

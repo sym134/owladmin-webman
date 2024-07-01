@@ -45,7 +45,7 @@ class AuthController extends AdminController
             if ($user && Hash::check($request->post('password'), $user->password)) {
                 if (!$user->enabled) {
                     // 登录事件
-                    Event::emit('user.login', ['username'=>$user->name, 'status'=>$user->id, 3, 'message'=>'用户未启用']);
+                    Event::emit('user.login', ['username' => $user->name, 'status' => 3, 'message' => '用户未启用']);
                     return $this->response()->fail(admin_trans('admin.user_disabled'));
                 }
 
@@ -54,12 +54,12 @@ class AuthController extends AdminController
                 $token = $this->guard()->login($user)->access_token;
 
                 // 登录事件
-                Event::emit('user.login', ['username'=>$user->name, 'status'=>$user->id, 1, 'message'=>'登陆成功']);
+                Event::emit('user.login', ['username' => $user->name, 'status' => 1, 'message' => '登陆成功']);
                 return $this->response()->success(compact('token'), admin_trans('admin.login_successful'));
             }
 
             // 登录事件
-            Event::emit('user.login', ['username'=>$user->name, 'status'=>$user->id, 2, 'message'=>'登陆失败']);
+            Event::emit('user.login', ['username' => $user->name, 'status' => 2, 'message' => '登陆失败']);
             abort(400, admin_trans('admin.login_failed'));
         } catch (\Exception $e) {
             return $this->response()->fail($e->getMessage());

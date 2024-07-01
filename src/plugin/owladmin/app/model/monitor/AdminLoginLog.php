@@ -16,5 +16,6 @@ class AdminLoginLog extends Model
         2 => '登陆失败',
         3 => '用户未启用',
     ];
+    public const UPDATED_AT = null;
     protected $table = 'admin_login_log';
 }
