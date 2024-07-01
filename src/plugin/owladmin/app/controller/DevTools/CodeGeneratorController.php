@@ -135,8 +135,8 @@ class CodeGeneratorController extends AdminController
             'args'        => [
                 'value' => [
                     'model_name'      => '${model_path}${' . $nameHandler . '}',
-                    'controller_name' => '${controller_path}${' . $nameHandler . '}controller',
-                    'service_name'    => '${service_path}${' . $nameHandler . '}service',
+                    'controller_name' => '${controller_path}${' . $nameHandler . '}Controller',
+                    'service_name'    => '${service_path}${' . $nameHandler . '}Service',
                 ],
             ],
         ];

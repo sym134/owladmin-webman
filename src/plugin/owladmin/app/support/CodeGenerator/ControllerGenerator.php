@@ -9,7 +9,7 @@ class ControllerGenerator extends BaseGenerator
 {
     public function generate(): bool|string
     {
-        return $this->writeFile($this->model->controller_name, 'controller');
+        return $this->writeFile($this->model->controller_name, 'Controller');
     }
 
     public function preview(): string
