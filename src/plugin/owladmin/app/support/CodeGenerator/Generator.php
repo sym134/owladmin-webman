@@ -256,9 +256,11 @@ class Generator
                 }
 
                 if ($migratePath) {
-                    $output = runCommand('migrate:run --path=' . rtrim($migratePath, '.php'))[0]; //  webman
+                    $output = runCommand('migrate:run --path=' . $migratePath)[0]; //  webman
                 } else {
-                    $output = runCommand('migrate:run')[0]; // webman
+                    $migratePath = $record->save_path['directory'];
+                    $migratePath = $migratePath === 'app' ? base_path('/database/migrations') : plugin_path($migratePath . '/database/migrations');
+                    $output = runCommand('migrate:run --path=' . $migratePath)[0]; // webman
                 }
                 $message .= $successMessage('Table', $output); // webman
             }
