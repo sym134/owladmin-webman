@@ -89,7 +89,6 @@ trait UploadTrait
     protected function upload($type = 'file'): Response
     {
         $file = request()->file('file');
-        // var_dump($file->getSize());
         if (!$file) {
             return $this->response()->fail(admin_trans('admin.upload_file_error'));
         }
@@ -97,7 +96,6 @@ trait UploadTrait
         $filesystem = StorageService::disk();
         try {
             $file_info = $filesystem->path(Admin::config('admin.upload.directory.' . $type))->upload($file);
-            var_dump($file_info);
             $res = AttachmentService::make()->store([
                 'storage_mode' => $file_info->adapter,
                 'origin_name'  => $file_info->origin_name,
@@ -111,11 +109,7 @@ trait UploadTrait
                 'url'          => $file_info->file_url,
                 'created_by'   => 1,
             ]);
-            var_dump('保存结构');
-            var_dump($res);
         } catch (Throwable $e) {
-            var_dump($e->getFile());
-            var_dump($e->getLine());
             return $this->response()->fail($e->getMessage());
         }
         return $this->response()->success(['value' => $file_info->file_url]);

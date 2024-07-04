@@ -57,7 +57,7 @@ class InstallCommand extends Command
         $this->createSettingController();
     }
 
-    protected function makeDir($path = '')
+    protected function makeDir($path = ''): void
     {
         $this->laravel['files']->makeDirectory("{$this->directory}/$path", 0755, true, true);
     }

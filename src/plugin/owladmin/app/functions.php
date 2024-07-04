@@ -38,7 +38,6 @@ if (!function_exists('runCommand')) {
         $process = new Symfony\Component\Process\Process($array);
         // 执行命令
         $process->run();
-        var_dump($process->getCommandLine());
         return [$process->isSuccessful(), $process->getOutput()];
     }
 }

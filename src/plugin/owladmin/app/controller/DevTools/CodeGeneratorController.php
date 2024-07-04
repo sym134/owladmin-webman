@@ -236,6 +236,7 @@ class CodeGeneratorController extends AdminController
                                     ->inputClassName('bg-gray-100')
                                     ->selectMode('group')
                                     ->source('${save_path_options}')
+                                    ->required()
                                     ->onEvent([
                                         'change' => [
                                             'actions' => [

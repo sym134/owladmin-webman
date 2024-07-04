@@ -15,7 +15,6 @@ class AdminOperationLogService extends AdminService
             ->intersect($this->getTableColumns())
             ->map(function ($field) use ($query) {
                 $query->when(request()->input($field), function ($query) use ($field) {
-                    var_dump($field);
                     if ($field === 'created_at') {
                         $created_at = explode(',', request()->input($field));
                         $query->whereBetween($field, [$created_at[0], $created_at[1]]);
