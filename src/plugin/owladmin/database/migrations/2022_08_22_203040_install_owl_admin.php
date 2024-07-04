@@ -197,7 +197,7 @@ return new class extends Migration {
             $table->increments('id');
             $table->string('name')->unique()->nullable()->comment('任务名称');
             $table->unsignedSmallInteger('task_type')->comment('任务类型');
-            $table->enum('execution_cycle', ['day', 'hour', 'week', 'month', 'second-n'])->comment('执行周期');
+            $table->enum('execution_cycle', ['day', 'hour', 'week', 'month', 'second-n','day-n','hour-n','minute-n'])->comment('执行周期');
             $table->string('target', 500)->nullable()->comment('调用目标');
             $table->string('parameter', 1000)->nullable()->comment('任务参数');
             $table->string('rule', 32)->nullable()->comment('表达式');
@@ -210,6 +210,18 @@ return new class extends Migration {
             $table->string('remark')->nullable()->comment('备注');
             $table->unsignedInteger('created_by')->comment('创建者');
             $table->timestamps();
+            $table->softDeletes();
+        });
+
+        $this->schema()->create('admin_crontab_log', function (Blueprint $table) {
+            $table->comment('定时任务日志');
+            $table->increments('id');
+            $table->unsignedInteger('crontab_id')->index()->comment('任务ID');
+            $table->string('target', 500)->comment('调用目标');
+            $table->string('parameter', 1000)->comment('调用参数');
+            $table->string('exception_info', 2000)->nullable()->comment('异常信息');
+            $table->unsignedTinyInteger('execution_status')->default(0)->comment('执行状态');
+            $table->datetime('created_at')->nullable()->comment('创建时间');
             $table->softDeletes();
         });
     }

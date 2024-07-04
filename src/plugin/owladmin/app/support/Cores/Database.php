@@ -267,8 +267,8 @@ class Database
 
             $data(['name' => '操作日志', 'slug' => 'admin_operation_log', 'http_path' => ["/log_monitoring/admin_operation_log*"], "parent_id" => 5]),
             $data(['name' => '登陆日志', 'slug' => 'admin_login_log', 'http_path' => ["/log_monitoring/admin_login_log*"], "parent_id" => 5]),
-            $data(['name' => '定时任务', 'slug' => 'admin_crontab', 'http_path' => ["/system/admin_crontab*"], "parent_id" => 5]),
-            $data(['name' => '定时任务日志', 'slug' => 'admin_crontab_log', 'http_path' => ["/system/admin_crontab_log*"], "parent_id" => 5]),
+            $data(['name' => '定时任务', 'slug' => 'admin_crontab', 'http_path' => ["/system/admin_crontab*"], "parent_id" => 2]),
+            $data(['name' => '定时任务日志', 'slug' => 'admin_crontab_log', 'http_path' => ["/system/admin_crontab_log*"], "parent_id" => 2]),
 
         ]);
 
@@ -292,6 +292,7 @@ class Database
                 'url'       => '/dashboard',
                 'is_home'   => 1,
             ]),
+            // 系统 2
             $data([
                 'parent_id' => 0,
                 'title'     => 'admin_system',
@@ -299,6 +300,7 @@ class Database
                 'url'       => '/system',
                 'is_home'   => 0,
             ]),
+            // 权限管理 3
             $data([
                 'parent_id' => 0,
                 'title'     => 'admin_permission_management',
@@ -367,13 +369,6 @@ class Database
                 'is_home'   => 0,
             ]),
             $data([
-                'parent_id' => 3,
-                'title'     => 'admin_crontab',
-                'icon'      => 'ant-design:menu-unfold-outlined',
-                'url'       => '/system/admin_crontab',
-                'is_home'   => 0,
-            ]),
-            $data([
                 'parent_id' => 2,
                 'title'     => 'admin_storage',
                 'icon'      => 'akar-icons:settings-horizontal',
@@ -385,6 +380,13 @@ class Database
                 'title'     => 'attachment',
                 'icon'      => 'grommet-icons:attachment',
                 'url'       => '/system/attachment',
+                'is_home'   => 0,
+            ]),
+            $data([
+                'parent_id' => 2,
+                'title'     => 'admin_crontab',
+                'icon'      => 'ant-design:menu-unfold-outlined',
+                'url'       => '/system/admin_crontab',
                 'is_home'   => 0,
             ]),
         ]);
