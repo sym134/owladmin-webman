@@ -48,7 +48,7 @@ return [
 composer require jizhi/owladmin-webman
 ```
 
-## 配置 .env
+## 配置 .env （按需添加）
 
 ```env
 # 语言
@@ -82,11 +82,6 @@ DB_CONNECTION=mysql
          ]
      ],
     // ........
-```
-
-## 数据库安装
-```shell
-php webman migrate:run
 ```
 
 ## 安装数据
