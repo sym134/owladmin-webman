@@ -16,10 +16,11 @@ use plugin\owladmin\app\controller\DevTools\EditorController;
 use plugin\owladmin\app\controller\AdminPermissionController;
 use plugin\owladmin\app\controller\DevTools\PluginController;
 use plugin\owladmin\app\controller\system\AttachmentController;
-use plugin\owladmin\app\controller\DevTools\ExtensionController;
+use plugin\owladmin\app\controller\system\AdminCrontabController;
 use plugin\owladmin\app\controller\monitor\AdminLoginLogController;
 use plugin\owladmin\app\controller\DevTools\RelationshipController;
 use plugin\owladmin\app\controller\DevTools\CodeGeneratorController;
+use plugin\owladmin\app\controller\system\AdminCrontabLogController;
 use plugin\owladmin\app\controller\monitor\AdminOperationLogController;
 
 Route::get('/admin1', [plugin\owladmin\app\controller\IndexController::class, 'index']);
@@ -69,14 +70,17 @@ Route::group('/' . config('plugin.owladmin.admin.route.prefix'), function () {
 
         Route::resource('/storage', StorageController::class);
         Route::resource('/attachment', AttachmentController::class);
+
+        Route::resource('/admin_crontab', AdminCrontabController::class);
+        Route::get('/admin_crontab_run', [AdminCrontabController::class, 'run']);
+        Route::resource('/admin_crontab_log', AdminCrontabLogController::class);
     });
 
-    Route::group('/log_monitoring',function (){
+    Route::group('/log_monitoring', function () {
         // 登录日志
         Route::resource('/admin_login_log', AdminLoginLogController::class);
         Route::resource('/admin_operation_log', AdminOperationLogController::class);
     });
-
 
 
     if (config('plugin.owladmin.admin.show_development_tools')) {

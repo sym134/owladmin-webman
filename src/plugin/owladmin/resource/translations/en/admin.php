@@ -362,4 +362,16 @@ Backup important data before performing operations!!!<br>
         'remark'       => 'Remark',
         'created_by'   => 'Created By',
     ],
+    'admin_crontab'       => [
+        'id'          => 'ID',
+        'name'        => 'Name',
+        'type'        => 'Type',
+        'target'      => 'Target',
+        'parameter'   => 'Parameter',
+        'rule'        => 'Execution Rule',
+        'singleton'   => 'Singleton Execution',
+        'task_status' => 'Status',
+        'remark'      => 'Remark',
+        'created_by'  => 'Created By',
+    ],
 ];

@@ -363,4 +363,17 @@ return [
         'remark'       => '备注',
         'created_by'   => '创建者',
     ],
+
+    'admin_crontab' => [
+        'id'          => 'ID',
+        'name'        => '任务名称',
+        'type'        => '任务类型',
+        'target'      => '调用任务字符串',
+        'parameter'   => '调用任务参数',
+        'rule'        => '任务执行表达式',
+        'singleton'   => '是否单次执行',
+        'task_status' => '状态',
+        'remark'      => '备注',
+        'created_by'  => '创建者',
+    ],
 ];

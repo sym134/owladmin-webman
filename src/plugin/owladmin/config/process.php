@@ -1,2 +1,9 @@
 <?php
-return [];
+
+use plugin\owladmin\app\process\Task;
+
+return [
+    'task'  => [
+        'handler'  => Task::class
+    ],
+];

@@ -191,6 +191,27 @@ return new class extends Migration {
             $table->dateTime('created_at')->nullable();
             $table->softDeletes();
         });
+
+        $this->schema()->create('admin_crontab', function (Blueprint $table) {
+            $table->comment('定时任务');
+            $table->increments('id');
+            $table->string('name')->unique()->nullable()->comment('任务名称');
+            $table->unsignedSmallInteger('task_type')->comment('任务类型');
+            $table->enum('execution_cycle', ['day', 'hour', 'week', 'month', 'second-n'])->comment('执行周期');
+            $table->string('target', 500)->nullable()->comment('调用目标');
+            $table->string('parameter', 1000)->nullable()->comment('任务参数');
+            $table->string('rule', 32)->nullable()->comment('表达式');
+            $table->unsignedTinyInteger('week')->default(1)->comment('周');
+            $table->unsignedTinyInteger('day')->default(1)->comment('天');
+            $table->unsignedTinyInteger('hour')->default(0)->comment('小时');
+            $table->unsignedTinyInteger('minute')->default(0)->comment('分钟');
+            $table->unsignedTinyInteger('second')->default(0)->comment('秒');
+            $table->unsignedTinyInteger('task_status')->default(0)->comment('状态');
+            $table->string('remark')->nullable()->comment('备注');
+            $table->unsignedInteger('created_by')->comment('创建者');
+            $table->timestamps();
+            $table->softDeletes();
+        });
     }
 
     /**
@@ -216,6 +237,7 @@ return new class extends Migration {
         $this->schema()->dropIfExists('attachments');
         $this->schema()->dropIfExists('admin_operation_log');
         $this->schema()->dropIfExists('admin_login_log');
-
+        $this->schema()->dropIfExists('admin_crontab');
+        $this->schema()->dropIfExists('admin_crontab_log');
     }
 };
