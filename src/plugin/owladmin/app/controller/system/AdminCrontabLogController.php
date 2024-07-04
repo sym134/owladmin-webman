@@ -17,6 +17,7 @@ class AdminCrontabLogController extends AdminController
 
     public function list($api = null): Page
     {
+        $this->queryPath = '/system/admin_crontab_log';
         $crud = $this->baseCRUD()->api(is_null($api) ? $this->getListGetDataPath() : $api)
             ->filterTogglable(false)
             ->headerToolbar([

@@ -143,11 +143,11 @@ return new class extends Migration {
         $this->schema()->create('attachments', function (Blueprint $table) {
             $table->comment('附件管理');
             $table->increments('id');
-            $table->enum('storage_mode',['local','qiniu','aliyun','qcloud'])->comment('存储模式');
+            $table->enum('storage_mode', ['local', 'qiniu', 'aliyun', 'qcloud'])->comment('存储模式');
             $table->string('origin_name')->nullable()->comment('原文件名');
             $table->string('new_name')->nullable()->comment('新文件名');
             $table->string('hash')->nullable()->comment('文件hash');
-            $table->enum('file_type',['image','video','audio','file'])->comment('资源类型');
+            $table->enum('file_type', ['image', 'video', 'audio', 'file'])->comment('资源类型');
             $table->string('mime_type')->comment('资源类型');
             $table->string('storage_path')->nullable()->comment('存储目录');
             $table->bigInteger('size_byte')->comment('字节数');
@@ -195,9 +195,9 @@ return new class extends Migration {
         $this->schema()->create('admin_crontab', function (Blueprint $table) {
             $table->comment('定时任务');
             $table->increments('id');
-            $table->string('name')->unique()->nullable()->comment('任务名称');
+            $table->string('name')->nullable()->comment('任务名称');
             $table->unsignedSmallInteger('task_type')->comment('任务类型');
-            $table->enum('execution_cycle', ['day', 'hour', 'week', 'month', 'second-n','day-n','hour-n','minute-n'])->comment('执行周期');
+            $table->enum('execution_cycle', ['day', 'hour', 'week', 'month', 'second-n', 'day-n', 'hour-n', 'minute-n'])->comment('执行周期');
             $table->string('target', 500)->nullable()->comment('调用目标');
             $table->string('parameter', 1000)->nullable()->comment('任务参数');
             $table->string('rule', 32)->nullable()->comment('表达式');
@@ -211,6 +211,7 @@ return new class extends Migration {
             $table->unsignedInteger('created_by')->comment('创建者');
             $table->timestamps();
             $table->softDeletes();
+            $table->unique(['name', 'deleted_at']);
         });
 
         $this->schema()->create('admin_crontab_log', function (Blueprint $table) {
@@ -221,7 +222,6 @@ return new class extends Migration {
             $table->string('parameter', 1000)->comment('调用参数');
             $table->string('exception_info', 2000)->nullable()->comment('异常信息');
             $table->unsignedTinyInteger('execution_status')->default(0)->comment('执行状态');
-            $table->datetime('created_at')->nullable()->comment('创建时间');
             $table->softDeletes();
         });
     }
